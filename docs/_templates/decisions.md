@@ -15,14 +15,18 @@ What constraints influenced the decision?
 ## Options considered
 ### Option 1
 Description.
+
 **Advantages**
 - 
+
 **Disadvantages**
 - 
 ### Option 2
 Description.
+
 **Advantages**
 - 
+
 **Disadvantages**
 - 
 ## Decision
