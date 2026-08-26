@@ -1,9 +1,11 @@
 ---
 type: architecture
 status: current
-created: <% tp.date.now("YYYY-MM-DD") %>
+created: 2026-08-27
+related_code: []
+related_docs: []
 ---
-# <% tp.file.title %>
+# duplicate-events
 ## Purpose
 What part of the system does this document describe?
 ## Responsibilities

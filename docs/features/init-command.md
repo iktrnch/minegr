@@ -7,26 +7,26 @@ related_code: []
 # init-command
 
 ## Summary
-`minegr init` - initialises the directory as a minecraft server.
+`minegr init` initialises the selected configuration file's parent directory as a Minecraft server.
 ### CLI Flags
 | Flag                            | Description                                                                                                 | Mandatory |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------- | --------- |
-| `--name <name>`                 | Sets the server display name. Defaults to the current directory name when omitted.                          | No        |
+| `--name <name>`                 | Sets the server display name. Defaults to the server-root directory name when omitted.                     | No        |
 | `--platform <platform>`         | Selects the server platform. Supported values: `vanilla`, `paper`, or `fabric`.                             | No        |
 | `--minecraft-version <version>` | Selects the Minecraft version. The version must be supported by the chosen platform.                        | No        |
 | `--memory <size>`               | Sets the maximum JVM heap size, such as `2GiB` or `4096MiB`. Uses a system-derived default when omitted.    | No        |
 | `--port <port>`                 | Sets the Minecraft server port. Defaults to `25565`.                                                        | No        |
 | `--accept-eula`                 | Confirms acceptance of the Minecraft EULA. When omitted, interactive initialization prompts for acceptance. | No        |
 | `--yes`                         | Skips the final configuration confirmation. It does not imply EULA acceptance.                              | No        |
-| `--uuid`                        | Regenerates the uuid of the `minegr.toml`                                                                   | No        |
+| `--uuid`                        | Regenerates the UUID in the selected configuration file.                                                    | No        |
 
 ## Behaviour
-Creates the `minegr.toml` unless already created
+Creates the selected configuration file unless it already exists.
 During the creation parameters can be passed as CLI flags or prompted in terminal. If the value is present in the CLI flag, the prompt is omitted. If the value in the CLI is invalid - print and error and exit.
 ## Workflow
 ### If `--uuid` is passed
-1. Create a new uuid for the `minegr.toml`
-### If `minegr.toml` is not found
+1. Create a new UUID in the selected configuration file.
+### If the configuration file is not found
 1. Prompt for a name
 2. Prompt for a server platform from
 	- Vanilla
@@ -43,8 +43,8 @@ During the creation parameters can be passed as CLI flags or prompted in termina
 	- Warn and ask for another value if it is unavailable
 7. Show a summary and ask for confirmation
 	- Exit if denied
-8. Create `minegr.toml`
-### If `minegr.toml` is found or just created
+8. Create the selected configuration file.
+### If the configuration file is found or just created
 1. Run validation:
 	- Determine the Java version required by that Minecraft version.
 	- Find a compatible Java installation.
@@ -55,8 +55,8 @@ During the creation parameters can be passed as CLI flags or prompted in termina
 	- Report warnings and actionable errors.
 2. Print the next action:
 ```
-Configuration: ./minegr.toml
-Start it with: minegr start
+Configuration: <path>
+Start it with: minegr start --config <path>
 ```
 ## Failure cases
 - Stdin is not terminal and user prompts are required
@@ -65,7 +65,7 @@ Start it with: minegr start
 - Use `clap` to parse CLI arguments into a struct
 - Instantiate a struct for init parameter
 	- For each struct entry take from CLI struct if Some or run a prompt if None
-- Create `minegr.toml`
+- Create the selected configuration file.
 - Run validation
 - Print next action message
 ### Recreating uuid

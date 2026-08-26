@@ -4,8 +4,6 @@ status: accepted
 created: 2026-08-24
 supersedes: []
 superseded_by: []
-related_code: []
-related_docs: []
 ---
 # 0002-sync-vs-async
 

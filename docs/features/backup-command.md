@@ -9,12 +9,6 @@ related_code: []
 ## Summary
 
 `minegr backup` creates a ZIP archive of the server's world folders while the server is stopped or running through minegr.
-### CLI flags
-
-| Flag | Description | Mandatory |
-| --- | --- | --- |
-| `--config <path>` | Path to `minegr.toml`. Defaults to `./minegr.toml`. | No |
-
 ## Behaviour
 Prints `Creating backup…`, creates `backups/backup-DD-MM-YYYY-HH-MM.zip`, then prints `Backup created: <path>`.
 
@@ -35,7 +29,7 @@ For a live snapshot, the daemon runs `save-off` and `save-all flush`, waiting up
 - Create `backups/` for its owner only and archives with mode `0600`.
 - A stopped or daemon-managed running server may be backed up; an unmanaged running server may not.
 ## Failure cases
-- Configuration, `server.properties`, or world paths are invalid.
+- `server.properties` or world paths are invalid.
 - A backup with the same timestamp exists or another backup is active.
 - Available space is smaller than the estimated input size.
 - The live save fails or exceeds five minutes.

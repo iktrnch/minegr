@@ -10,16 +10,10 @@ related_code: []
 
 `minegr start` starts a configured Minecraft server through its per-server daemon and waits until the server is ready.
 
-### CLI flags
-
-| Flag | Description | Mandatory |
-| --- | --- | --- |
-| `--config <path>` | Path to a `minegr.toml` file. Defaults to `./minegr.toml`. | No |
-
 ## Behaviour
 Prints `Starting server…`, starts the daemon, and waits quietly for the server's `Done!` message. On success, prints `Server started successfully.`
 
-Startup times out after five minutes. Failure output goes to stderr and includes the last 100 startup-log lines and the persistent log path.
+Startup times out after five minutes. Failure output goes to stderr and includes the last 100 startup-log lines and the persistent log path (can reuse logic from [logs-command](logs-command.md)).
 ## Workflow
 1. Load and validate the configuration without installing missing dependencies
 2. Use the configuration UUID to connect to `$XDG_RUNTIME_DIR/minegr/<uuid>.sock`
@@ -37,20 +31,11 @@ Server is already running, stop it with `minegr stop`
 - The daemon removes its socket and exits when Java stops
 ## Failure cases
 
-- No configuration is found:
-```text
-Failed to locate minegr.toml
-Possible solutions:
-1. Enter a directory with existing config
-2. Create a new server with minegr init
-3. Pass the path manually via minegr start --config <path>
-```
-- The configuration is invalid or has no UUID.
+- The configuration has no UUID.
 - Java or the configured server software is unavailable.
 - Startup fails, is interrupted, or exceeds five minutes.
 ## Implementation
-`minegr start` launches the current executable in an internal daemon mode and communicates with it through a Unix socket. Daemon lifecycle and protocol details belong in `docs/features/daemon.md`.
-
+`minegr start` launches the current executable in an internal daemon mode and communicates with it through a Unix socket. Daemon lifecycle and protocol details belong in [daemon](daemon.md)
 ## Related
 - [init-command](init-command.md)
 - [daemon](daemon.md)

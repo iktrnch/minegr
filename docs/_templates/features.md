@@ -2,7 +2,6 @@
 type: feature
 status: unimplemented
 created: <% tp.date.now("YYYY-MM-DD") %>
-related_code: []
 ---
 # <% tp.file.title %>
 ## Summary

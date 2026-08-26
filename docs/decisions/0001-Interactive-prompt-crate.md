@@ -1,11 +1,9 @@
 ---
 type: decision
-status: accepted
+status: superseded
 created: 2026-08-24
 supersedes: []
-superseded_by: []
-related_code: []
-related_docs: []
+superseded_by: ["0003"]
 ---
 ## Context
 

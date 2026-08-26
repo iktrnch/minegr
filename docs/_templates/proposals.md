@@ -2,7 +2,6 @@
 type: proposal
 status: proposed
 created: <% tp.date.now("YYYY-MM-DD") %>
-related_docs: []
 ---
 # <% tp.file.title %>
 ## Problem

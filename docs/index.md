@@ -8,6 +8,7 @@
 
 - [0001 — Interactive prompt crate](decisions/0001-Interactive-prompt-crate.md)
 - [0002 — Sync vs async](decisions/0002-sync-vs-async.md)
+- [0003 — Use Dialoguer for interactive prompts](decisions/0003-use-dialoguer-for-interactive-prompts.md)
 
 ## Features
 

@@ -4,8 +4,6 @@ status: accepted
 created: <% tp.date.now("YYYY-MM-DD") %>
 supersedes: []
 superseded_by: []
-related_code: []
-related_docs: []
 ---
 # <% tp.file.title %>
 

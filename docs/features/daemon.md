@@ -16,16 +16,17 @@ Concurrent clients may use `start`, `stop`, `restart`, `status`, and `logs`. Onl
 ## Workflow
 1. Bind `$XDG_RUNTIME_DIR/minegr/<uuid>.sock` and validate the client handshake.
 2. Start Java and report readiness, failure, or cancellation.
-3. Serve clients until Java stops, then remove the socket and exit.
+3. Serve clients until final stop; replace Java in place during restart.
 ## Rules
 - The handshake verifies the protocol version, server UUID, and canonical configuration path.
 - The runtime directory and socket are accessible only to their Unix owner.
 - The daemon and Java process are unique per server; Java must not outlive the daemon.
 - Disconnecting the initiating client before readiness cancels startup. Later client disconnects do not stop Java.
-- Restart validates the configuration before stopping Java, retains the socket, and requires the UUID and canonical path to remain unchanged.
-- Stop sends `stop`, waits 60 seconds, then escalates to `SIGTERM` and `SIGKILL` after a further 10 seconds.
-- The daemon keeps the latest 10,000 current-session lines in memory. Historical logs come from Minecraft's `latest.log` and dated logs; minegr does not duplicate them.
+- Restart validates the configuration before stopping Java, retains the socket, and requires the UUID and canonical path to remain unchanged. It shares the command queue; later commands wait for readiness and duplicate restart clients join the same operation.
+- Stop queues `stop` after active backup work and accepted console commands, waits 60 seconds, then escalates to `SIGTERM` and `SIGKILL` after another 10 seconds. New commands are rejected once stop is queued.
+- The daemon keeps only the latest 10,000 daemon-session lines in memory, including lines across restarts.
 - Slow streaming clients are disconnected rather than allowed to delay the daemon.
+- Restarting the server does not restart the daemon.
 ## Failure cases
 - An active daemon, mismatched handshake, invalid restart configuration, or second console connection is rejected without affecting Java.
 - Startup failure returns the last 100 session lines and the Minecraft log path.
