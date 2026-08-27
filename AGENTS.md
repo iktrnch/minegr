@@ -28,7 +28,9 @@ Use standard `rustfmt` formatting and Rust naming conventions:
 - `PascalCase` for types and traits.
 - `SCREAMING_SNAKE_CASE` for constants.
 
-Prefer small, focused modules and explicit error propagation over panics in operational paths. Document public APIs and behaviour affecting server files, processes, backups, or updates.
+Prefer small, focused modules and explicit error propagation over panics in operational paths.
+Document public APIs and behaviour affecting server files, processes, backups, or updates.
+Include /// Documentation comments which briefly explain what each function does.
 
 ## Feature and Refactor Workflow
 
