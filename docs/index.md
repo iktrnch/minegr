@@ -4,12 +4,15 @@
 
 ## Architecture
 - [Commands](architecture/commands.md)
-- [Duplicate Events](architecture/duplicate-events.md)
-- [Sockets](architecture/sockets.md)
+- [Configuration](architecture/configuration.md)
+- [Ipc Protocol](architecture/ipc-protocol.md)
+- [Operation Coordination](architecture/operation-coordination.md)
 ## Decisions
 - [0001 Interactive Prompt Crate](decisions/0001-Interactive-prompt-crate.md)
 - [0002 Sync Vs Async](decisions/0002-sync-vs-async.md)
 - [0003 Use Dialoguer For Interactive Prompts](decisions/0003-use-dialoguer-for-interactive-prompts.md)
+- [0004 Frame Messages Over Unix Streams](decisions/0004-frame-messages-over-unix-streams.md)
+- [0005 Use One Or Two Ipc Tunnels](decisions/0005-use-one-or-two-ipc-tunnels.md)
 ## Features
 - Commands
   - [Backup](features/commands/backup.md)

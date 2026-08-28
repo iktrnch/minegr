@@ -25,6 +25,7 @@ Redirected output disables animation and prints `Stopping server…`, `Server st
 - Commands submitted during restart remain queued until the server is running.
 - Console and `logs --follow` clients remain connected.
 - A second restart client joins the operation already in progress.
+- A stop request cancels pending startup and the restart client reports `CancelledByStop`.
 - `Ctrl+C` closes only the client; restart continues.
 - Forced shutdown prints a warning and continues once Java exits.
 - The daemon log buffer remains continuous across restarts.
@@ -32,11 +33,12 @@ Redirected output disables animation and prints `Stopping server…`, `Server st
 - No daemon is available: `Server is not running`.
 - Invalid reloaded configuration leaves the running server untouched.
 - Shutdown failure prevents startup.
+- Stop cancels the restart.
 - Startup failure cleans up Java and the daemon, leaving the server stopped.
 Failure prints `Failed to restart server: <reason>` and the last 100 daemon-session lines to stderr.
 ## Implementation
 The daemon composes its existing stop and start flows while retaining its socket. The client renders phase progress with Indicatif.
 ## Related
-- [daemon](daemon.md)
-- [start-command](start-command.md)
-- [stop-command](stop-command.md)
+- [Daemon](../daemon.md)
+- [Start command](start.md)
+- [Stop command](stop.md)

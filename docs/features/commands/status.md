@@ -45,7 +45,7 @@ Error: failed to read memory usage: <reason>
 ```
 - If both metrics are unavailable, report separate errors in memory-then-CPU order.
 ## Implementation
-The daemon reads the Java process state, RSS, and CPU usage. The client formats the response without sending anything to the Minecraft console.
+The daemon reads the Java process state, RSS, and CPU usage. The client formats the response without sending anything to the Minecraft console. The same IPC port provides a state-only subscription for the console TUI.
 ## Related
-- [daemon](daemon.md)
-- [minegr-command](minegr-command.md)
+- [Daemon](../daemon.md)
+- [Minegr command](minegr.md)

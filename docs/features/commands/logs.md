@@ -39,6 +39,6 @@ related_docs: []
 ## Implementation
 The command is a Tokio socket client that writes streamed lines directly to stdout. It uses no TUI or pager.
 ## Related
-- [daemon](daemon.md)
-- [console-command](console-command.md)
-- [sockets](../architecture/sockets.md)
+- [Daemon](../daemon.md)
+- [Console command](console.md)
+- [IPC protocol](../../architecture/ipc-protocol.md)

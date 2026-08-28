@@ -1,11 +1,9 @@
 ---
 type: architecture
 status: current
-created: 2026-08-24
-related_code: []
-related_docs: []
+created: 2026-08-28
 ---
-# Untitled
+# configuration
 ## Purpose
 What part of the system does this document describe?
 ## Responsibilities

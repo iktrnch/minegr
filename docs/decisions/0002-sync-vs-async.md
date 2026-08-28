@@ -50,4 +50,4 @@ The daemon is primarily concurrent I/O: client connections, Java streams, signal
 
 ## Related
 - [daemon](../features/daemon.md)
-- [sockets](../architecture/sockets.md)
+- [ipc-protocol](../architecture/ipc-protocol.md)
