@@ -1,9 +1,9 @@
 ---
 type: architecture
-status: current
+status: draft
 created: 2026-08-28
 ---
-# configuration
+# Configuration
 ## Purpose
 What part of the system does this document describe?
 ## Responsibilities
@@ -23,4 +23,4 @@ Use a Mermaid diagram where it makes the architecture substantially clearer.
 Things that must remain true regardless of implementation details.
 - 
 ## Related
-- 
+-

@@ -32,6 +32,6 @@ Dialoguer meets Minegr's prompt needs and keeps prompts and progress output in t
 - Some advanced prompts require optional features.
 ## Related
 - [ADR 0001](0001-Interactive-prompt-crate.md)
-- [Init command](../features/init-command.md)
-- [Restart command](../features/restart-command.md)
+- [Init command](../features/commands/init.md)
+- [Restart command](../features/commands/restart.md)
 - [Dialoguer examples](https://github.com/console-rs/dialoguer/tree/main/examples)

@@ -14,14 +14,14 @@ related_code: []
 | `--name <name>`                 | Sets the server display name. Defaults to the server-root directory name when omitted.                     | No        |
 | `--platform <platform>`         | Selects the server platform. Supported values: `vanilla`, `paper`, or `fabric`.                             | No        |
 | `--minecraft-version <version>` | Selects the Minecraft version. The version must be supported by the chosen platform.                        | No        |
-| `--memory <size>`               | Sets the maximum JVM heap size, such as `2GiB` or `4096MiB`. Uses a system-derived default when omitted.    | No        |
+| `--memory <size>`               | Sets the maximum JVM heap size, such as `2GiB` or `4096MiB`. Defaults to `2GiB` when omitted.               | No        |
 | `--port <port>`                 | Sets the Minecraft server port. Defaults to `25565`.                                                        | No        |
 | `--accept-eula`                 | Confirms acceptance of the Minecraft EULA. When omitted, interactive initialization prompts for acceptance. | No        |
 | `--yes`                         | Skips the final configuration confirmation. It does not imply EULA acceptance.                              | No        |
 | `--uuid`                        | Regenerates the UUID in the selected configuration file.                                                    | No        |
 
 ## Behaviour
-Creates the selected configuration file unless it already exists.
+Creates and validates the selected configuration file when it does not exist. If it already exists and `--uuid` is not passed, the command does nothing.
 During the creation parameters can be passed as CLI flags or prompted in terminal. If the value is present in the CLI flag, the prompt is omitted. If the value in the CLI is invalid - print and error and exit.
 ## Workflow
 ### If `--uuid` is passed
@@ -44,7 +44,7 @@ During the creation parameters can be passed as CLI flags or prompted in termina
 7. Show a summary and ask for confirmation
 	- Exit if denied
 8. Create the selected configuration file.
-### If the configuration file is found or just created
+### After the configuration file is created
 1. Run validation:
 	- Determine the Java version required by that Minecraft version.
 	- Find a compatible Java installation.

@@ -20,7 +20,7 @@ The timestamp uses local time. Existing backups are never overwritten or removed
 4. If the daemon is running, request a live snapshot. Otherwise, verify that no world `session.lock` is active.
 5. Create a temporary ZIP, rename it atomically, and report its path.
 
-For a live snapshot, the daemon runs `save-off` and `save-all flush`, waiting up to five minutes. Console commands are queued until the backup client finishes or disconnects. The daemon then runs `save-on` before executing every queued command.
+For a live snapshot, the daemon runs `save-off` and `save-all flush`, waiting up to five minutes. Console inputs are queued until the backup client finishes or disconnects. The daemon then runs `save-on` before executing every queued input.
 ## Rules
 - Only one backup may run per server.
 - Preserve world directory names at the ZIP root.
@@ -36,9 +36,8 @@ For a live snapshot, the daemon runs `save-off` and `save-all flush`, waiting up
 - An active `session.lock` belongs to a server not managed by the daemon.
 - Archiving is interrupted or fails.
 
-Failure removes the temporary ZIP. A live backup always restores saving and drains queued console commands before returning.
+Failure removes the temporary ZIP. A live backup always restores saving and drains queued Console inputs before returning.
 ## Implementation
 The CLI owns path validation, size estimation, and ZIP creation. The daemon only controls the live snapshot window and recovers it if the client disconnects.
 ## Related
-- [daemon](daemon.md)
-- [restore-command](restore-command.md)
+- [Daemon](../daemon.md)

@@ -36,6 +36,7 @@ Relative paths resolve from the current directory. The configuration file's pare
 ## Rules
 
 - Every subcommand must honor the selected configuration path.
+- The resolved canonical configuration path must be valid UTF-8.
 - `init` creates that exact file; other commands require it to exist.
 - `init` requires the parent directory to exist.
 
@@ -47,11 +48,17 @@ Relative paths resolve from the current directory. The configuration file's pare
 Failed to load configuration <path>: <reason>
 ```
 
+- The resolved path is not valid UTF-8:
+
+```text
+Configuration path is not valid UTF-8: <path>
+```
+
 ## Implementation
 
 Clap defines `--config` once on the root parser with `global = true`; command-specific options remain on their subcommands.
 
 ## Related
 
-- [init-command](init-command.md)
-- [start-command](start-command.md)
+- [Init command](init.md)
+- [Start command](start.md)

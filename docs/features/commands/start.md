@@ -13,7 +13,7 @@ related_code: []
 ## Behaviour
 Prints `Starting server…`, starts the daemon, and waits quietly for the server's `Done!` message. On success, prints `Server started successfully.`
 
-Startup times out after five minutes. Failure output goes to stderr and includes the last 100 startup-log lines and the persistent log path (can reuse logic from [logs-command](logs-command.md)).
+Startup times out after five minutes. Failure output goes to stderr and includes the last 100 startup-log lines and the persistent log path (can reuse logic from [logs command](logs.md)).
 ## Workflow
 1. Load and validate the configuration without installing missing dependencies
 2. Use the configuration UUID to connect to `$XDG_RUNTIME_DIR/minegr/<uuid>.sock`
@@ -28,14 +28,14 @@ Server is already running, stop it with `minegr stop`
 ```
 - If the socket's daemon has the same UUID but a different canonical configuration path, report that the UUID is already running at another path and suggest `minegr init --uuid`
 - Failure, timeout, or Ctrl-C stops the Java process
-- The daemon removes its socket and exits when Java stops
+- The daemon removes its socket when the daemon exits after startup failure, final stop, or unexpected Java exit. Restart retains the daemon and socket.
 ## Failure cases
 
 - The configuration has no UUID.
 - Java or the configured server software is unavailable.
 - Startup fails, is interrupted, or exceeds five minutes.
 ## Implementation
-`minegr start` launches the current executable in an internal daemon mode and communicates with it through a Unix socket. Daemon lifecycle and protocol details belong in [daemon](daemon.md)
+`minegr start` launches the current executable in an internal daemon mode and communicates with it through a Unix socket. Daemon lifecycle and protocol details belong in [daemon](../daemon.md)
 ## Related
-- [init-command](init-command.md)
-- [daemon](daemon.md)
+- [Init command](init.md)
+- [Daemon](../daemon.md)

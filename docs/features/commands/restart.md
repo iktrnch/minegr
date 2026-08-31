@@ -17,12 +17,12 @@ Indicatif displays `Stopping server…` and `Starting server…` as active spinn
 Redirected output disables animation and prints `Stopping server…`, `Server stopped successfully.`, `Starting server…`, and `Server restarted successfully.` once each.
 ## Workflow
 1. Reload and validate the configuration before showing progress.
-2. Queue restart after active backup work and earlier commands.
+2. Queue restart after active backup work and earlier Console inputs.
 3. Stop Java using the normal stop sequence while retaining the daemon and socket.
 4. Start Java and wait up to five minutes for readiness.
-5. Execute console commands queued behind restart and report success.
+5. Execute Console inputs queued behind restart and report success.
 ## Rules
-- Commands submitted during restart remain queued until the server is running.
+- Console inputs submitted during restart remain queued until the server is running.
 - Console and `logs --follow` clients remain connected.
 - A second restart client joins the operation already in progress.
 - A stop request cancels pending startup and the restart client reports `CancelledByStop`.

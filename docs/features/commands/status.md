@@ -4,8 +4,8 @@ status: unimplemented
 created: 2026-08-24
 related_code: []
 related_docs:
-  - daemon.md
-  - minegr-command.md
+  - ../daemon.md
+  - minegr.md
 ---
 # status-command
 ## Summary
@@ -31,7 +31,7 @@ Status: stopped
 - Show metrics whenever Java is alive, including while starting or stopping.
 - Memory is resident memory (RSS), rounded to whole MiB.
 - CPU is rounded to one decimal; `100%` equals one fully used core and may be exceeded.
-- Status requests are read-only and bypass the console-command queue.
+- Status requests are read-only and bypass the Console input queue.
 - Every reported state exits with code `0`.
 ## Failure cases
 - A protocol or daemon identity mismatch fails with a non-zero exit.

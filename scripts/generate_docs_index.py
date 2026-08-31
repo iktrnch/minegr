@@ -59,6 +59,21 @@ def build_index(docs_dir: Path) -> str:
         "",
     ]
 
+    references = sorted(
+        (
+            entry
+            for entry in docs_dir.iterdir()
+            if entry.is_file()
+            and entry.suffix.lower() == ".md"
+            and entry.name != "index.md"
+            and not entry.name.startswith("_")
+        ),
+        key=lambda entry: (entry.name.casefold(), entry.name),
+    )
+    if references:
+        lines.append("## Reference")
+        lines.extend(f"- {markdown_link(entry, docs_dir)}" for entry in references)
+
     for section in SECTIONS:
         lines.append(f"## {section.title()}")
         entries = directory_lines(docs_dir / section, docs_dir)

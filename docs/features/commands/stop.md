@@ -17,15 +17,15 @@ If graceful shutdown exceeds 60 seconds, the daemon sends `SIGTERM`, then `SIGKI
 
 ## Workflow
 
-1. Load the configuration and connect using the stable stop-mode handshake, which permits a version mismatch.
-2. Stop accepting work, finish active backup recovery, and drain accepted console commands.
+1. Load the configuration and connect using a handshake that requires a matching Minegr version.
+2. Stop accepting work, finish active backup recovery, and drain accepted Console inputs.
 3. Cancel restart startup and stop Java.
 4. Wait for Java termination, output draining, and socket cleanup.
 5. Report the daemon's final result.
 
 ## Rules
 
-- New console commands are rejected after stop is queued.
+- New Console inputs are rejected after stop is queued.
 - Later stop clients observe shutdown in progress and wait for socket removal without joining it.
 - `Ctrl+C` closes only the client; shutdown continues in the daemon.
 - Java must not outlive the daemon.
@@ -34,14 +34,14 @@ If graceful shutdown exceeds 60 seconds, the daemon sends `SIGTERM`, then `SIGKI
 ## Failure cases
 
 - No daemon is available: `Server is not running`.
-- Peer, handshake, or stop-message validation fails before shutdown is accepted.
+- Peer, version, identity, or stop-message validation fails before shutdown is accepted.
 - Java remains alive after escalation or daemon cleanup fails.
 
 Failure prints `Failed to stop server: <reason>` and the last 100 daemon-session log lines to stderr.
 
 ## Implementation
 
-The CLI submits one stop request and waits over the Unix socket. If it cannot decode an older daemon's response, EOF and socket removal determine success. The daemon owns queue ordering, signals, process reaping, and cleanup.
+The CLI submits one stop request and waits over the Unix socket. It does not attempt to stop a daemon using an incompatible protocol. The daemon owns queue ordering, signals, process reaping, and cleanup.
 
 ## Related
 

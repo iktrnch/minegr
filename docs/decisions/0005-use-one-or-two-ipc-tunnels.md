@@ -14,7 +14,7 @@ Minegr tunnels are bidirectional, but requests and streamed responses must be re
 Call `UnixStream::into_split()` and give the read and write halves separate owners.
 
 **Advantages**
-- Uses one connection and handshake per command.
+- Uses one connection and handshake per CLI Command.
 - Needs no pairing identifier.
 - Supports independent reads and writes directly in Tokio.
 
@@ -45,7 +45,7 @@ One connection already provides independent full-duplex I/O. Splitting it avoids
 
 ## Consequences
 ### Positive
-- Each command needs one connection and handshake.
+- Each CLI Command needs one connection and handshake.
 - Only one task serializes and writes frames.
 - The bounded channel isolates response producers from socket writes.
 
@@ -56,5 +56,6 @@ One connection already provides independent full-duplex I/O. Splitting it avoids
 
 ## Related
 - [IPC protocol](../architecture/ipc-protocol.md)
+- [Glossary](../glossary.md)
 - [Frame messages over Unix streams](0004-frame-messages-over-unix-streams.md)
 - [Sync vs async](0002-sync-vs-async.md)

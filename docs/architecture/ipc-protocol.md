@@ -8,18 +8,18 @@ created: 2026-08-24
 
 ## Purpose
 
-Define communication between a persistent server daemon and command clients over local Unix sockets.
+Define communication between a persistent server daemon and CLI Command clients over local Unix sockets.
 
 ## Responsibilities
 
 - Authenticate clients and validate daemon identity.
 - Frame and serialize messages.
-- Route each tunnel to one logical command port.
+- Route each CLI Command's tunnel to one session and its permitted logical ports.
 - Support one-shot exchanges and long-lived subscriptions without blocking the daemon.
 
 ## Structure
 
-The daemon listens at `$XDG_RUNTIME_DIR/minegr/<uuid>.sock`. Each command port uses an independent full-duplex `UnixStream` connection to that path. The console TUI opens three connections—one each for `Logs`, `Status`, and `Console`—and each connection is split into read and write halves.
+The daemon listens at `$XDG_RUNTIME_DIR/minegr/<uuid>.sock`. Each CLI Command that communicates with the daemon opens one independent full-duplex `UnixStream` connection to that path and splits it into read and write halves. Most Commands use one logical port. The console TUI uses one connection carrying its `Logs`, `Status`, and `Console` ports.
 
 After accepting a connection, the daemon verifies its peer UID and splits the `UnixStream`. One task owns the read half. Response producers send typed `Message` values through a 32-message `mpsc` channel to one task that serializes and owns the write half.
 
@@ -39,11 +39,6 @@ enum CloseReason {
     FellBehind,
 }
 
-enum HandshakeMode {
-    Full,
-    Stop,
-}
-
 enum HandshakeResponse {
     Accepted,
     Rejected(HandshakeError),
@@ -56,7 +51,7 @@ enum Message {
     Logs(Exchange<LogsRequest, LogsResponse>),
     Console(Exchange<ConsoleRequest, ConsoleResponse>),
     Status(Exchange<StatusRequest, StatusResponse>),
-    // Other daemon-backed commands.
+    // Other daemon-backed operations.
     ProtocolError(ProtocolError),
 }
 ```
@@ -67,7 +62,7 @@ Request and response payloads are distinct structs. Response types may represent
 
 ```mermaid
 flowchart LR
-    C[Command client] -->|connect| L[Unix listener]
+    C[CLI Command] -->|connect| L[Unix listener]
     L --> A[Authenticate peer]
     A --> R[Reader task]
     R --> H[Handshake and route]
@@ -78,13 +73,13 @@ flowchart LR
     J[Java process] --> P
 ```
 
-Every tunnel starts with a stable handshake containing `env!("CARGO_PKG_VERSION")`, the server UUID, canonical configuration path, and `HandshakeMode`. Paths must be valid UTF-8. `Full` requires an exact version match. `Stop` permits a mismatch after validating identity and locks the tunnel to the stop port. A rejected full handshake reports both versions, instructs the user to stop and start the server, then closes the tunnel.
+Every tunnel starts with a handshake containing `env!("CARGO_PKG_VERSION")`, the server UUID, and canonical configuration path. Paths must be valid UTF-8. Every CLI Command, including `stop`, requires an exact Minegr-version match. A rejected handshake reports both Minegr versions and closes the tunnel. Minegr does not provide a release-compatible stop path; after updating the binary while an older daemon is running, the user may need to terminate the old daemon and Java process manually.
 
-`StopRequest` has no fields. `StopResponse` contains `Requested`, `Stopped`, and `Failed`. The client decodes compatible responses; if decoding fails, it waits for EOF and socket removal. A decode failure does not cancel shutdown.
+`StopRequest` has no fields. `StopResponse` contains `Requested`, `Stopped`, and `Failed` within the protocol used between matching Minegr versions.
 
-The first accepted stop request enters daemon shutdown and receives `Requested`. New handshakes receive `Rejected(HandshakeError::DaemonStopping)` while existing tunnels stop accepting requests. The daemon keeps the listener and socket until shutdown completes, lets an active backup finish or restore saving, drains accepted console commands, cancels restart startup, stops Java, drains its output, and sends `Stopped`. Remaining tunnels receive `Closed(DaemonStopping)` before the socket is removed. A restart cancelled by stop receives `CancelledByStop` first.
+The first accepted stop request enters daemon shutdown and receives `Requested`. New handshakes receive `Rejected(HandshakeError::DaemonStopping)` while existing tunnels stop accepting requests. The daemon keeps the listener and socket until shutdown completes, lets an active backup finish or restore saving, drains accepted Console inputs, cancels restart startup, stops Java, drains its output, and sends `Stopped`. Remaining tunnels receive `Closed(DaemonStopping)` before the socket is removed. A restart cancelled by stop receives `CancelledByStop` first.
 
-After the handshake, the first command variant locks the tunnel to that port. The client keeps at most one unanswered request on a tunnel. Responses may contain updates, followed by exactly one terminal outcome. Short-lived tunnels then close. Subscriptions accept `Exchange::Close`, reply with `Closed(Requested)`, and also end on EOF.
+After the handshake, the first Message variant locks the tunnel to a Command session. Most sessions permit only that variant. A console-opening request selects the composite console session, which permits only `Logs`, `Status`, and `Console` variants on the same tunnel. The client keeps at most one unanswered request per permitted port, so the console's log and status subscriptions may coexist with one pending Console input. Responses may contain updates, followed by exactly one terminal outcome per request. Short-lived tunnels then close. Subscriptions accept `Exchange::Close`, reply with `Closed(Requested)`, and also end on EOF.
 
 Each message derives Serde's standard `Serialize` and `Deserialize` implementations. Its compact JSON payload is prefixed by a four-byte big-endian length. Zero-length and payloads over 16 MiB are rejected. Rust field and variant names are therefore part of the wire schema. Invalid framing, JSON, message order, or port use returns `ProtocolError` when possible and closes the tunnel.
 
@@ -92,7 +87,7 @@ Log history and live entries use the same ordered response and may be split acro
 
 Status subscriptions send one initial state and later state changes; CPU and memory metrics remain one-shot status data. At final shutdown, subscribers receive remaining logs, the final `stopped` state, then `Closed(DaemonStopping)`.
 
-Each console tunnel has a client UUID and an increasing `u64` command ID starting at one. The client increments only after acknowledgement. The daemon stores only that connection's highest accepted ID; an ID less than or equal to it is acknowledged without enqueueing. Connection loss clears this state and commands are never retried automatically.
+Each console tunnel has a client UUID and an increasing `u64` Console input ID starting at one. The client increments only after acknowledgement. The daemon stores only that connection's highest accepted ID; an ID less than or equal to it is acknowledged without enqueueing. Connection loss clears this state and Console inputs are never retried automatically.
 
 ## Interfaces
 
@@ -105,29 +100,30 @@ Each console tunnel has a client UUID and an increasing `u64` command ID startin
 
 - Ordered response messages to the requesting tunnel.
 - Log and status updates to their current subscribers.
-- Console commands to one daemon-owned FIFO queue.
+- Console inputs to one daemon-owned FIFO queue.
 
 ## Invariants
 
 - Connections are independent byte streams, not a shared event log.
 - No transport-level request or subscription identifiers are used; the tunnel and message port provide routing.
 - Only the writer task serializes and writes frames to a tunnel.
-- A full streaming response queue disconnects only that slow subscriber. One-time responses use a five-second per-frame write timeout.
+- A full streaming response queue disconnects only that slow tunnel. Closing a composite console tunnel ends its `Logs`, `Status`, and `Console` ports together without affecting other clients. One-time responses use a five-second per-frame write timeout.
 - Graceful completion drains queued responses through the terminal message. Protocol errors, slow subscribers, and broken tunnels discard remaining queued messages.
 - No heartbeat is required; EOF and write failure detect lost clients.
-- Tunnel closure follows command semantics: subscriptions detach, acknowledged console commands remain queued, accepted stop and restart operations continue, and an initiating start disconnect cancels startup before readiness.
-- Multiple console clients are allowed. Complete commands enter one FIFO in daemon-accepted order and are acknowledged after enqueueing.
+- Tunnel closure follows Command semantics: subscriptions detach, acknowledged Console inputs remain queued, accepted stop and restart operations continue, and an initiating start disconnect cancels startup before readiness.
+- Multiple console clients are allowed. Complete Console inputs enter one FIFO in daemon-accepted order and are acknowledged after enqueueing.
 - The runtime directory is mode `0700`, the socket is mode `0600`, and the daemon accepts only its owner's UID.
 - Missing `XDG_RUNTIME_DIR` is an error; Minegr never falls back to `/tmp`.
-- Handshake and first-command setup has a five-second timeout. Established subscriptions have no idle timeout.
+- Handshake and first-Message setup has a five-second timeout. Established subscriptions have no idle timeout.
 - Each daemon accepts at most 128 simultaneous tunnels. Excess connections receive `Rejected(HandshakeError::TunnelLimit)` without starting port tasks.
-- Released Minegr versions uniquely identify their wire schema. Handshake request and response shapes, plus the stop request, remain compatible across releases.
+- Released Minegr versions uniquely identify their wire schema. Minegr makes no cross-version wire-compatibility guarantee.
 - During shutdown the listener remains responsive only to report `DaemonStopping`; it dispatches no new work.
 - The daemon removes its socket after Java exits and shutdown work drains. `start` removes a stale path only when it is an owner-matched Unix socket with no responsive daemon.
 
 ## Related
 
 - [Daemon](../features/daemon.md)
+- [Glossary](../glossary.md)
 - [Logs command](../features/commands/logs.md)
 - [Console command](../features/commands/console.md)
 - [Frame messages over Unix streams](../decisions/0004-frame-messages-over-unix-streams.md)

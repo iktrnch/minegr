@@ -35,7 +35,7 @@ flowchart TD
     J --> K[Build command context]
     K --> L[Run handler]
 ```
-Clap supplies `--config <path>` or defaults it to `./minegr.toml`. Relative paths resolve from the current directory. Existing files are canonicalized directly; `init` canonicalizes the existing parent before appending the new filename.
+Clap supplies `--config <path>` or defaults it to `./minegr.toml`. Relative paths resolve from the current directory. Existing files are canonicalized directly; `init` canonicalizes the existing parent before appending the new filename. The resulting configuration path must be valid UTF-8 for every Command, including `init`.
 
 Normal `init` skips configuration loading. Focused helpers receive a shared mutable `InitConfig` questionnaire and fill it from CLI values or Dialoguer prompts. `create_config` derives the complete runtime `Config`, writes it, and returns it for validation. `init --uuid` instead loads the existing `Config`, changes only its UUID, and rewrites it.
 
@@ -53,6 +53,7 @@ Handlers return structured errors. The dispatcher renders the final error once a
 - A new or atomically replaced `minegr.toml` from `init`.
 ## Invariants
 - `minegr.toml` is the single configuration source; loading uses TOML and Serde without layered configuration.
+- The centrally resolved canonical configuration path is valid UTF-8 before any Command loads or creates configuration.
 - Only `init` may create configuration. `init --uuid` is the only init path that loads an existing configuration.
 - Direct Dialoguer or Indicatif use is confined to the UI module. Raw logs, status data, and Ratatui rendering are explicit exceptions.
 - UI callers choose semantic operations, not colors, glyphs, or spinner templates.
