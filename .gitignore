@@ -1,4 +1,5 @@
 node_modules
+data.json
 
 # Output
 .output
@@ -21,3 +22,52 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Impeccable local state and generated review artifacts
+**/.impeccable/hook.cache.json
+**/.impeccable/hook.pending.json
+.impeccable/config.local.json
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/history/
+.impeccable/provider-smoke/
+
+# Impeccable live-session state; keep live/config.json trackable
+.impeccable/live/server.json
+.impeccable/live/codex-worker.json
+.impeccable/live/codex-worker.log
+.impeccable/live/roots.json
+.impeccable/live/app-root.json
+.impeccable/live/inject-journal.json
+.impeccable/live/sessions/
+.impeccable/live/previews/
+.impeccable/live/annotations/
+.impeccable/live/artifacts/
+.impeccable/live/accept-receipts/
+.impeccable/live/locks/
+.impeccable/live/cache/
+.impeccable/live/benchmarks/
+.impeccable/live/manual-edit-apply-transaction.json
+.impeccable/live/manual-edit-events.jsonl
+.impeccable/live/manual-edit-evidence/
+.impeccable/live/pending-manual-edits.json
+.impeccable/live/deferred-svelte-component-accepts.json
+
+# Impeccable critique runs; shared deferrals remain trackable
+.impeccable/critique/*
+!.impeccable/critique/ignore.md
+
+# Legacy Impeccable live-mode runtime injection
+.impeccable-live.json
+.impeccable-live/
+app/.impeccable-live/
+src/.impeccable-live/
+src/lib/impeccable/ImpeccableLiveRoot.svelte
+src/lib/impeccable/__runtime.js
+src/lib/impeccable/[0-9a-f]*/
+plugins/impeccable-live.client.ts
+app/plugins/impeccable-live.client.ts
+src/plugins/impeccable-live.client.ts
+
+# Impeccable provider smoke-test pages
+src/__impeccable_provider_smoke_*.html

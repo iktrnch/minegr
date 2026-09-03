@@ -1,1 +1,176 @@
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/jetbrains-mono';
 @import 'tailwindcss';
+
+@theme {
+	--font-sans: 'Archivo Variable', sans-serif;
+	--font-mono: 'JetBrains Mono Variable', monospace;
+}
+
+:root {
+	font-family: var(--font-sans);
+	font-synthesis: none;
+	color-scheme: dark;
+	background: #030806;
+}
+
+html {
+	scroll-behavior: smooth;
+	background: #030806;
+}
+
+body {
+	margin: 0;
+	min-width: 320px;
+	background: #030806;
+}
+
+::selection {
+	color: #022c22;
+	background: #34d399;
+}
+
+::-webkit-scrollbar {
+	width: 11px;
+}
+
+::-webkit-scrollbar-track {
+	background: #030806;
+}
+
+::-webkit-scrollbar-thumb {
+	border: 3px solid #030806;
+	border-radius: 999px;
+	background: #3f3f46;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #10b981;
+}
+
+.hero {
+	background: #030806;
+}
+
+.signal-bleed {
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background:
+		radial-gradient(
+			circle at 76% 54%,
+			rgb(0 143 68 / 0.82) 0,
+			rgb(0 98 47 / 0.52) 24%,
+			rgb(0 50 28 / 0.2) 48%,
+			transparent 72%
+		),
+		radial-gradient(circle at 40% 25%, rgb(16 185 129 / 0.12), transparent 38%);
+	animation: bleed-in 1.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.wordmark {
+	font-size: clamp(5.25rem, 15vw, 13rem);
+	font-stretch: 112%;
+	line-height: 0.72;
+	letter-spacing: -0.055em;
+}
+
+.descriptor {
+	font-size: clamp(2.15rem, 4.8vw, 4.6rem);
+	line-height: 1.08;
+	letter-spacing: -0.035em;
+}
+
+.terminal {
+	border: 1px solid rgb(82 82 91 / 0.82);
+}
+
+.terminal-screen {
+	background: radial-gradient(circle at 100% 100%, rgb(6 78 42 / 0.24), transparent 54%), #070a08;
+}
+
+.terminal-cursor {
+	animation: cursor-blink 1.05s steps(1, end) infinite;
+}
+
+.signal-trace {
+	transform-origin: left;
+	animation: signal-travel 1.8s 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes bleed-in {
+	from {
+		opacity: 0.45;
+		filter: blur(20px);
+		transform: scale(0.96) translateX(3%);
+	}
+	to {
+		opacity: 1;
+		filter: blur(0);
+		transform: scale(1) translateX(0);
+	}
+}
+
+@keyframes signal-travel {
+	from {
+		transform: scaleX(0);
+	}
+	to {
+		transform: scaleX(1);
+	}
+}
+
+@keyframes cursor-blink {
+	0%,
+	48% {
+		opacity: 1;
+	}
+	49%,
+	100% {
+		opacity: 0;
+	}
+}
+
+@media (max-width: 63.999rem) {
+	.signal-bleed {
+		background:
+			radial-gradient(
+				circle at 88% 48%,
+				rgb(0 143 68 / 0.66) 0,
+				rgb(0 87 43 / 0.36) 30%,
+				transparent 68%
+			),
+			radial-gradient(circle at 35% 18%, rgb(16 185 129 / 0.1), transparent 42%);
+	}
+}
+
+@media (max-width: 39.999rem) {
+	.wordmark {
+		font-size: clamp(4.5rem, 23vw, 6rem);
+		line-height: 0.8;
+	}
+
+	.descriptor {
+		font-size: clamp(2rem, 10vw, 3.1rem);
+	}
+
+	.status-label {
+		font-size: 0.65rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+
+	.signal-bleed,
+	.signal-trace,
+	.terminal-cursor {
+		animation: none;
+	}
+
+	.primary-action {
+		transition: none;
+	}
+}

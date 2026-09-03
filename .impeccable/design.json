@@ -1,0 +1,165 @@
+{
+	"schemaVersion": 2,
+	"generatedAt": "2026-09-03T12:55:00+01:00",
+	"title": "Design System: Minegr",
+	"extensions": {
+		"colorMeta": {
+			"signal": {
+				"role": "primary",
+				"displayName": "Live Signal",
+				"canonical": "oklch(69.6% 0.17 162.48)",
+				"tonalRamp": [
+					"oklch(26.2% 0.051 172.552)",
+					"oklch(37.8% 0.077 168.94)",
+					"oklch(43.2% 0.095 166.913)",
+					"oklch(50.8% 0.118 165.612)",
+					"oklch(59.6% 0.145 163.225)",
+					"oklch(69.6% 0.17 162.48)",
+					"oklch(84.5% 0.143 164.978)",
+					"oklch(95% 0.052 163.051)"
+				]
+			},
+			"field": {
+				"role": "neutral",
+				"displayName": "Night Field",
+				"canonical": "#030806",
+				"tonalRamp": [
+					"#030806",
+					"#070a08",
+					"#090d0b",
+					"#18181b",
+					"#3f3f46",
+					"#71717a",
+					"#d4d4d8",
+					"#fafafa"
+				]
+			}
+		},
+		"typographyMeta": {
+			"display": {
+				"displayName": "Monumental Display",
+				"purpose": "Product identity only."
+			},
+			"mono": {
+				"displayName": "Operational Mono",
+				"purpose": "Commands, measurements, and status metadata."
+			},
+			"label-compact": {
+				"displayName": "Compact Status",
+				"purpose": "Planned lifecycle state labels."
+			},
+			"label-preview": {
+				"displayName": "Preview Label",
+				"purpose": "Terminal preview metadata."
+			}
+		},
+		"shadows": [
+			{
+				"name": "terminal-lift",
+				"value": "0 28px 80px rgba(0,0,0,0.48)",
+				"purpose": "Elevates the one active operational pane."
+			},
+			{
+				"name": "action-hover",
+				"value": "0 14px 36px rgba(16,185,129,0.18)",
+				"purpose": "Adds a restrained downward response to the primary action."
+			}
+		],
+		"motion": [
+			{
+				"name": "signal-entry",
+				"value": "1.25s cubic-bezier(0.16, 1, 0.3, 1)",
+				"purpose": "Settles the hero signal field into place once."
+			},
+			{
+				"name": "lifecycle-trace",
+				"value": "1.8s 0.45s cubic-bezier(0.16, 1, 0.3, 1)",
+				"purpose": "Travels across a connected lifecycle sequence once."
+			}
+		],
+		"breakpoints": [
+			{ "name": "sm", "value": "640px" },
+			{ "name": "lg", "value": "1024px" }
+		]
+	},
+	"components": [
+		{
+			"name": "Primary Action",
+			"kind": "button",
+			"refersTo": "button-primary",
+			"description": "The single high-confidence action on a persuasive surface.",
+			"html": "<a class=\"ds-primary-action\" href=\"#\">Star on GitHub</a>",
+			"css": ".ds-primary-action { display:inline-flex; min-height:52px; align-items:center; justify-content:center; padding:14px 28px; border-radius:12px; background:oklch(69.6% 0.17 162.48); color:oklch(26.2% 0.051 172.552); font:700 16px/1 'Archivo Variable',sans-serif; text-decoration:none; transition:background-color .2s,transform .2s,box-shadow .2s; } .ds-primary-action:hover { background:oklch(76.5% 0.177 163.223); transform:translateY(-2px); box-shadow:0 14px 36px rgba(16,185,129,.18); } .ds-primary-action:focus-visible { outline:2px solid oklch(84.5% 0.143 164.978); outline-offset:4px; }"
+		},
+		{
+			"name": "Terminal Panel",
+			"kind": "custom",
+			"refersTo": "terminal-panel",
+			"description": "The one elevated operational surface for real commands and state.",
+			"html": "<figure class=\"ds-terminal\"><figcaption class=\"ds-terminal-bar\">DESIGN PREVIEW <span>PLANNED</span></figcaption><pre>$ minegr status\nStatus: running</pre></figure>",
+			"css": ".ds-terminal { overflow:hidden; margin:0; border:1px solid oklch(37% .013 285.805); border-radius:14px; background:#070a08; color:oklch(98.5% 0 0); box-shadow:0 28px 80px rgba(0,0,0,.48); font:400 14px/1.7 'JetBrains Mono Variable',monospace; } .ds-terminal-bar { display:flex; justify-content:space-between; padding:16px 24px; border-bottom:1px solid oklch(37% .013 285.805); background:#18181b; color:oklch(70.5% .015 286.067); font-size:11px; letter-spacing:.08em; } .ds-terminal-bar span { color:oklch(76.5% .177 163.223); } .ds-terminal pre { margin:0; padding:28px; font:inherit; }"
+		},
+		{
+			"name": "Stage Marker",
+			"kind": "custom",
+			"refersTo": "stage-marker",
+			"description": "A numbered point on a meaningful connected sequence.",
+			"html": "<span class=\"ds-stage-marker\">1</span>",
+			"css": ".ds-stage-marker { display:inline-flex; width:40px; height:40px; align-items:center; justify-content:center; border:1px solid oklch(69.6% .17 162.48); border-radius:9999px; background:#030806; color:oklch(84.5% .143 164.978); font:400 14px/1 'JetBrains Mono Variable',monospace; transition:background-color .2s,color .2s; } .ds-stage-marker:hover { background:oklch(69.6% .17 162.48); color:oklch(26.2% .051 172.552); }"
+		},
+		{
+			"name": "Status Label",
+			"kind": "custom",
+			"description": "Compact factual metadata paired with a signal point.",
+			"html": "<span class=\"ds-status\"><i></i> PRE-ALPHA</span>",
+			"css": ".ds-status { display:inline-flex; align-items:center; gap:8px; color:oklch(95% .052 163.051 / .7); font:600 12px/1 'JetBrains Mono Variable',monospace; letter-spacing:.14em; } .ds-status i { width:8px; height:8px; border-radius:9999px; background:oklch(69.6% .17 162.48); }"
+		},
+		{
+			"name": "Footer Link",
+			"kind": "custom",
+			"description": "A low-priority source reference on the night field.",
+			"html": "<a class=\"ds-footer-link\" href=\"#\">Source on GitHub</a>",
+			"css": ".ds-footer-link { color:oklch(55.2% .016 285.938); font:400 12px/1.5 'JetBrains Mono Variable',monospace; text-decoration-color:oklch(37% .013 285.805); text-underline-offset:4px; transition:color .2s; } .ds-footer-link:hover { color:oklch(76.5% .177 163.223); } .ds-footer-link:focus-visible { outline:2px solid oklch(76.5% .177 163.223); outline-offset:4px; }"
+		}
+	],
+	"narrative": {
+		"northStar": "The Live Server Signal",
+		"overview": "Minegr treats the interface as one operational field: near-black space is interrupted by a broad green signal, precise rules, and the occasional contained terminal surface. Scale and overlap make the work memorable; restrained controls keep it credible. The system is technical without dressing every element as a terminal.",
+		"keyCharacteristics": [
+			"Monumental wide display type against quiet open space.",
+			"One committed emerald signal over charcoal-black fields.",
+			"Exact rules and connected sequences instead of generic card grids.",
+			"Matte surfaces with one selectively elevated operational pane.",
+			"A single authored motion event with reduced-motion support."
+		],
+		"rules": [
+			{
+				"name": "The Signal Field Rule",
+				"body": "Green may own a large continuous region or one active state; do not scatter small green decorations across unrelated elements.",
+				"section": "colors"
+			},
+			{
+				"name": "The Evidence Mono Rule",
+				"body": "Use monospace only for commands, measurements, and status metadata.",
+				"section": "typography"
+			},
+			{
+				"name": "The One Lifted Surface Rule",
+				"body": "Elevate the active operational surface; leave surrounding page regions on the field.",
+				"section": "elevation"
+			}
+		],
+		"dos": [
+			"Do use broad green fields to connect content regions.",
+			"Do create hierarchy with scale, overlap, and negative space.",
+			"Do keep planned functionality visibly labeled during pre-alpha.",
+			"Do keep repeated content in typed data structures rather than duplicating markup."
+		],
+		"donts": [
+			"Don't use literal Minecraft imagery, pixel fonts, creatures, blocks, or game screenshots as brand language.",
+			"Don't turn technical content into neon, glass, or glow-heavy chrome.",
+			"Don't use same-size icon cards as the page structure.",
+			"Don't use monospace outside code, data, and real operational metadata."
+		]
+	}
+}
