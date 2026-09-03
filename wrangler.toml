@@ -1,0 +1,7 @@
+"$schema" = "./node_modules/wrangler/config-schema.json"
+
+# No Minegr Pages project exists in the connected account yet. Keep this name
+# aligned with the project created in Cloudflare before the first deployment.
+name = "minegr-landing"
+pages_build_output_dir = "./build"
+compatibility_date = "2026-09-03"

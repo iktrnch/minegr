@@ -16,7 +16,7 @@ typography:
     fontFamily: 'Archivo Variable, sans-serif'
     fontSize: 'clamp(5.25rem, 15vw, 13rem)'
     fontWeight: 900
-    lineHeight: 0.72
+    lineHeight: 0.82
     letterSpacing: '-0.055em'
   headline:
     fontFamily: 'Archivo Variable, sans-serif'
@@ -124,7 +124,7 @@ The palette is a restrained primary-plus-neutral system: emerald carries state a
 
 ### Hierarchy
 
-- **Display:** Very heavy, viewport-responsive, and tightly stacked; reserved for product identity.
+- **Display:** Very heavy, viewport-responsive, and compact without colliding with following copy; reserved for product identity.
 - **Headline:** Regular weight with compact spacing; pairs directly with the display wordmark.
 - **Title:** Semibold at 1.5rem; names lifecycle stages.
 - **Body:** Regular at 0.875rem with 1.5rem line height; supports short factual explanations.

@@ -71,7 +71,7 @@ body {
 .wordmark {
 	font-size: clamp(5.25rem, 15vw, 13rem);
 	font-stretch: 112%;
-	line-height: 0.72;
+	line-height: 0.82;
 	letter-spacing: -0.055em;
 }
 

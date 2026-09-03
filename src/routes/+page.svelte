@@ -122,7 +122,7 @@
 			<div class="hero-copy pt-12 sm:pt-14 lg:pt-12">
 				<h1 id="hero-title" class="max-w-[68rem] text-balance">
 					<span class="wordmark block font-black text-emerald-500">{product.name}</span>
-					<span class="descriptor mt-1 block max-w-[23ch] font-normal text-zinc-50">
+					<span class="descriptor mt-6 block max-w-[23ch] font-normal text-zinc-50 sm:mt-8">
 						{product.description}
 					</span>
 				</h1>
@@ -189,7 +189,7 @@
 		<h2 id="features-title" class="sr-only">Planned server lifecycle features</h2>
 
 		<div
-			class="lifecycle-line absolute top-[10.3rem] right-14 left-14 hidden h-px bg-zinc-700 lg:block"
+			class="lifecycle-line absolute top-[11.25rem] right-14 left-14 hidden h-px bg-zinc-700 lg:block"
 			aria-hidden="true"
 		>
 			<span class="signal-trace block h-px bg-emerald-500"></span>
