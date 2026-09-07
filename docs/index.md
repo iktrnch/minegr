@@ -5,16 +5,23 @@
 ## Reference
 - [Glossary](glossary.md)
 ## Architecture
+- [Artifact Acquisition](architecture/artifact-acquisition.md)
 - [Commands](architecture/commands.md)
 - [Configuration](architecture/configuration.md)
+- [Filesystem Layout](architecture/filesystem-layout.md)
 - [Ipc Protocol](architecture/ipc-protocol.md)
+- [Logging](architecture/logging.md)
 - [Operation Coordination](architecture/operation-coordination.md)
+- [Validation](architecture/validation.md)
 ## Decisions
 - [0001 Interactive Prompt Crate](decisions/0001-Interactive-prompt-crate.md)
 - [0002 Sync Vs Async](decisions/0002-sync-vs-async.md)
 - [0003 Use Dialoguer For Interactive Prompts](decisions/0003-use-dialoguer-for-interactive-prompts.md)
 - [0004 Frame Messages Over Unix Streams](decisions/0004-frame-messages-over-unix-streams.md)
 - [0005 Use One Or Two Ipc Tunnels](decisions/0005-use-one-or-two-ipc-tunnels.md)
+- [0006 Use One Declarative Instance File](decisions/0006-use-one-declarative-instance-file.md)
+- [0007 Tail Minecraft Latest Log](decisions/0007-tail-minecraft-latest-log.md)
+- [0008 Coordinate Exclusive Operations In The Daemon](decisions/0008-coordinate-exclusive-operations-in-the-daemon.md)
 ## Features
 - Commands
   - [Backup](features/commands/backup.md)
@@ -26,6 +33,8 @@
   - [Start](features/commands/start.md)
   - [Status](features/commands/status.md)
   - [Stop](features/commands/stop.md)
+  - [Sync](features/commands/sync.md)
 - [Daemon](features/daemon.md)
 ## Proposals
+- [Addon Configuration](proposals/addon-configuration.md)
 - [Cross Version Stop](proposals/cross-version-stop.md)

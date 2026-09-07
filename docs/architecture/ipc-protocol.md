@@ -77,15 +77,15 @@ Every tunnel starts with a handshake containing `env!("CARGO_PKG_VERSION")`, the
 
 `StopRequest` has no fields. `StopResponse` contains `Requested`, `Stopped`, and `Failed` within the protocol used between matching Minegr versions.
 
-The first accepted stop request enters daemon shutdown and receives `Requested`. New handshakes receive `Rejected(HandshakeError::DaemonStopping)` while existing tunnels stop accepting requests. The daemon keeps the listener and socket until shutdown completes, lets an active backup finish or restore saving, drains accepted Console inputs, cancels restart startup, stops Java, drains its output, and sends `Stopped`. Remaining tunnels receive `Closed(DaemonStopping)` before the socket is removed. A restart cancelled by stop receives `CancelledByStop` first.
+The first accepted stop request enters daemon shutdown and receives `Requested`. New handshakes receive `Rejected(HandshakeError::DaemonStopping)` while existing tunnels stop accepting requests. A later `stop` client maps that rejection to `AlreadyInProgress` and exits successfully. The daemon keeps the listener and socket until shutdown completes, lets an atomic backup finish, drains accepted Console inputs, cancels restart startup, stops Java, drains its output, and sends `Stopped`. Remaining tunnels receive `Closed(DaemonStopping)` before the socket is removed. A restart cancelled by stop receives `CancelledByStop` first.
 
 After the handshake, the first Message variant locks the tunnel to a Command session. Most sessions permit only that variant. A console-opening request selects the composite console session, which permits only `Logs`, `Status`, and `Console` variants on the same tunnel. The client keeps at most one unanswered request per permitted port, so the console's log and status subscriptions may coexist with one pending Console input. Responses may contain updates, followed by exactly one terminal outcome per request. Short-lived tunnels then close. Subscriptions accept `Exchange::Close`, reply with `Closed(Requested)`, and also end on EOF.
 
 Each message derives Serde's standard `Serialize` and `Deserialize` implementations. Its compact JSON payload is prefixed by a four-byte big-endian length. Zero-length and payloads over 16 MiB are rejected. Rust field and variant names are therefore part of the wire schema. Invalid framing, JSON, message order, or port use returns `ProtocolError` when possible and closes the tunnel.
 
-Log history and live entries use the same ordered response and may be split across frames. Normal batches target at most 64 KiB of serialized JSON; a larger line below 16 MiB is sent alone. A client receives one consistent tail followed by every later entry exactly once, without a gap. A line exceeding 16 MiB is replaced in the stream by `Line exceeds the 16 MiB protocol limit; see <server-root>/logs/latest.log`.
+Log history and live entries come from Minecraft's current `logs/latest.log`, use the same ordered response, and may be split across frames. Normal batches target at most 64 KiB of serialized JSON; a larger line below 16 MiB is sent alone. A client receives one consistent tail followed by every later entry exactly once, without a gap. File replacement or truncation during restart resets history and established followers continue from the new file without replay. A line exceeding 16 MiB is replaced in the stream by `Line exceeds the 16 MiB protocol limit; see <server-root>/logs/latest.log`.
 
-Status subscriptions send one initial state and later state changes; CPU and memory metrics remain one-shot status data. At final shutdown, subscribers receive remaining logs, the final `stopped` state, then `Closed(DaemonStopping)`.
+Status subscriptions send one initial state and later state changes; CPU and memory metrics remain one-shot status data. At final shutdown, subscribers receive log lines already observed from the file, the final `stopped` state, then `Closed(DaemonStopping)`.
 
 Each console tunnel has a client UUID and an increasing `u64` Console input ID starting at one. The client increments only after acknowledgement. The daemon stores only that connection's highest accepted ID; an ID less than or equal to it is acknowledged without enqueueing. Connection loss clears this state and Console inputs are never retried automatically.
 
@@ -112,6 +112,7 @@ Each console tunnel has a client UUID and an increasing `u64` Console input ID s
 - No heartbeat is required; EOF and write failure detect lost clients.
 - Tunnel closure follows Command semantics: subscriptions detach, acknowledged Console inputs remain queued, accepted stop and restart operations continue, and an initiating start disconnect cancels startup before readiness.
 - Multiple console clients are allowed. Complete Console inputs enter one FIFO in daemon-accepted order and are acknowledged after enqueueing.
+- The Console input FIFO is unbounded. Lifecycle exclusion and stop priority are owned by the operation coordinator rather than transport backpressure.
 - The runtime directory is mode `0700`, the socket is mode `0600`, and the daemon accepts only its owner's UID.
 - Missing `XDG_RUNTIME_DIR` is an error; Minegr never falls back to `/tmp`.
 - Handshake and first-Message setup has a five-second timeout. Established subscriptions have no idle timeout.
@@ -129,3 +130,5 @@ Each console tunnel has a client UUID and an increasing `u64` Console input ID s
 - [Frame messages over Unix streams](../decisions/0004-frame-messages-over-unix-streams.md)
 - [Use one or two IPC tunnels](../decisions/0005-use-one-or-two-ipc-tunnels.md)
 - [Sync vs async](../decisions/0002-sync-vs-async.md)
+- [Logging](logging.md)
+- [Operation coordination](operation-coordination.md)

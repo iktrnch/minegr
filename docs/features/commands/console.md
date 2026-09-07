@@ -18,7 +18,7 @@ The Ratatui interface follows the Codex CLI layout: unframed logs, a bordered co
 ╰────────────────────────────────────────────╯
  server-name  ● running
 ```
-It loads up to 10,000 daemon-session lines, starts at the newest line, and displays new logs live. The state uses green for `running`, yellow for `starting` or `stopping`, and red for `failed` or `stopped`.
+It loads up to 10,000 lines from Minecraft's current `logs/latest.log`, starts at the newest line, and displays new logs live. The state uses green for `running`, yellow for `starting` or `stopping`, and red for `failed` or `stopped`.
 
 ## Workflow
 1. Load the configuration and open one console tunnel carrying `Logs`, `Status`, and `Console` Messages.
@@ -41,6 +41,7 @@ It loads up to 10,000 daemon-session lines, starts at the newest line, and displ
 - Console inputs are not echoed and daemon queueing is not shown.
 - Clear input only after the daemon accepts it; accepted inputs execute once even if the client disconnects.
 - Keep the console attached across restart and queue inputs until the server is running.
+- When restart replaces or truncates `latest.log`, keep the client attached and continue with the new file without replaying old lines.
 - When scrolled up, pause auto-follow and show the number of unseen lines.
 - Keep the composer focused; mouse input only scrolls logs.
 - Keep history in memory for this TUI session only. Support single-line editing, Unicode, and paste; do not provide completion.
@@ -49,6 +50,7 @@ It loads up to 10,000 daemon-session lines, starts at the newest line, and displ
 - `Ctrl+C` closes only the client and never stops the server.
 ## Failure cases
 - A stopped server reports `Server is not running, start it with minegr start`.
+- If Java fails while the daemon remains, preserve logs, show `failed`, disable input, and remain attached for restart or `Ctrl+C`.
 - If the server stops after connection, preserve final logs, show `stopped`, disable input, and wait for `Ctrl+C`.
 - If Console input submission fails, retain the input.
 ## Implementation
@@ -57,3 +59,4 @@ Ratatui renders the interface while Tokio handles terminal events and one daemon
 - [Daemon](../daemon.md)
 - [Logs command](logs.md)
 - [IPC protocol](../../architecture/ipc-protocol.md)
+- [Logging](../../architecture/logging.md)

@@ -4,94 +4,94 @@ status: unimplemented
 created: 2026-08-24
 related_code: []
 ---
+
 # init-command
 
 ## Summary
-`minegr init` initialises the selected configuration file's parent directory as a Minecraft server.
-### CLI Flags
-| Flag                            | Description                                                                                                 | Mandatory |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------- | --------- |
-| `--name <name>`                 | Sets the server display name. Defaults to the server-root directory name when omitted.                     | No        |
-| `--platform <platform>`         | Selects the server platform. Supported values: `vanilla`, `paper`, or `fabric`.                             | No        |
-| `--minecraft-version <version>` | Selects the Minecraft version. The version must be supported by the chosen platform.                        | No        |
-| `--memory <size>`               | Sets the maximum JVM heap size, such as `2GiB` or `4096MiB`. Defaults to `2GiB` when omitted.               | No        |
-| `--port <port>`                 | Sets the Minecraft server port. Defaults to `25565`.                                                        | No        |
-| `--accept-eula`                 | Confirms acceptance of the Minecraft EULA. When omitted, interactive initialization prompts for acceptance. | No        |
-| `--yes`                         | Skips the final configuration confirmation. It does not imply EULA acceptance.                              | No        |
-| `--uuid`                        | Regenerates the UUID in the selected configuration file.                                                    | No        |
+
+`minegr init` creates a declarative instance configuration or materializes its missing managed files.
+
+### CLI flags
+
+| Flag | Description | Mandatory |
+| --- | --- | --- |
+| `--name <name>` | Server display name; defaults to the server-root directory name. | No |
+| `--minecraft-version <version>` | Exact Minecraft version. | No |
+| `--platform <platform>` | `vanilla`, `paper`, or `fabric`. | No |
+| `--memory <size>` | Writes matching `-Xms` and `-Xmx` JVM arguments; defaults to `2G`. | No |
+| `--port <port>` | Writes `server-port`; defaults to `25565`. | No |
+| `--accept-eula` | Records explicit Minecraft EULA acceptance. | No |
+| `--yes` | Skips the final creation confirmation; never implies EULA acceptance. | No |
+| `--uuid` | Regenerates only the UUID in an existing configuration. | No |
 
 ## Behaviour
-Creates and validates the selected configuration file when it does not exist. If it already exists and `--uuid` is not passed, the command does nothing.
-During the creation parameters can be passed as CLI flags or prompted in terminal. If the value is present in the CLI flag, the prompt is omitted. If the value in the CLI is invalid - print and error and exit.
+
+Without an existing `minegr.toml`, the command gathers a complete configuration, writes it atomically with mode `0600`, then materializes `server.jar`, `server.properties`, and `eula.txt`.
+
+With an existing configuration, normal `init` validates it and creates only missing managed files. It never overwrites a differing file. This lets a copied `minegr.toml` recreate the configured initial instance without importing or changing mutable state.
+
+`init --uuid` changes only the selected configuration's UUID. It is allowed for a copied configuration whose old UUID belongs to a daemon at another canonical path, but is rejected when the selected instance itself is running.
+
 ## Workflow
-### If `--uuid` is passed
-1. Create a new UUID in the selected configuration file.
-### If the configuration file is not found
-1. Prompt for a name
-2. Prompt for a server platform from
-	- Vanilla
-	- Paper
-	- Fabric
-3. Prompt for a minecraft version
-4. Prompt for EULA agreement
-	- Exit if user selects no
-5. Prompt for memory limit
-	- Default 2 GiB
-6. Prompt for server port
-	- Default 25565
-	- Check whether the port is already occupied
-	- Warn and ask for another value if it is unavailable
-7. Show a summary and ask for confirmation
-	- Exit if denied
-8. Create the selected configuration file.
-### After the configuration file is created
-1. Run validation:
-	- Determine the Java version required by that Minecraft version.
-	- Find a compatible Java installation.
-	- Check available memory and disk space.
-	- Check port availability.
-	- Check directory permissions.
-	- Download or resolve the selected server software.
-	- Report warnings and actionable errors.
-2. Print the next action:
-```
+
+### Create configuration
+
+1. Resolve the selected configuration path and canonical server root.
+2. Prompt for a name when omitted.
+3. Select a Minecraft version from Mojang's authoritative list. Show 12 entries before scrolling, support search, prioritize newest eligible releases, and reveal snapshots when search matches them.
+4. Show only Vanilla, Paper, or Fabric choices available for that version.
+5. Resolve the exact stable platform build and checksum where available.
+6. Prompt for explicit EULA acceptance.
+7. Convert `--memory <size>` or its `2G` default to `-Xms<size>` and `-Xmx<size>` in `java.jvm_args`; default `java.server_args` to `["nogui"]`.
+8. Collect Minecraft properties, including the selected port.
+9. Validate all answers, show a summary, and ask for confirmation unless `--yes` was passed.
+10. Write `minegr.toml` atomically.
+11. Materialize missing managed files and report the next action.
+
+### Materialize existing configuration
+
+1. Load and validate `minegr.toml`.
+2. Check every managed path.
+3. Create missing files and download only the pinned artifact.
+4. Fail when an existing managed file differs.
+
+## Rules
+
+- Java is a host prerequisite. Select a compatible runtime from the optional configured executable or `PATH`; never install Java.
+- The configuration remains after a materialization failure so the command can be retried.
+- Downloads use unique owner-only system temporary storage and no persistent cache.
+- A non-empty server root is allowed, but conflicting managed files fail validation.
+- The command never guesses coordinates from an existing `server.jar` and never imports mutable state.
+- `--memory` exists only on `init`; later Java changes are made in `minegr.toml`.
+- Values provided by flags skip their corresponding prompts. Invalid flag values fail instead of prompting again.
+
+## Failure cases
+
+- Required prompts are unavailable because stdin or stderr is not a terminal.
+- EULA acceptance or final confirmation is denied.
+- The selected version and platform have no eligible artifact.
+- Upstream metadata or downloads are unavailable.
+- Java is incompatible or unavailable.
+- Configuration, paths, permissions, port, memory, disk, or checksum validation fails.
+- A managed file exists with content that differs from the configuration. Name it and tell the user to remove it before retrying.
+- The selected instance is running during `init --uuid`.
+
+## Implementation
+
+Clap populates an `InitConfig` questionnaire. `create_config(InitConfig)` derives the runtime `Config`, writes it, and returns it for validation. Normal existing-file initialization loads `Config` and materializes missing files. Artifact and validation details remain in their architecture documents.
+
+On success, print:
+
+```text
 Configuration: <path>
 Start it with: minegr start --config <path>
 ```
-## Failure cases
-- Stdin is not terminal and user prompts are required
-## Implementation
-### Creating config
-- Use `clap` to parse CLI arguments into a struct
-- Instantiate a struct for init parameter
-	- For each struct entry take from CLI struct if Some or run a prompt if None
-- Create the selected configuration file.
-- Run validation
-- Print next action message
-### Recreating uuid
-- Use `uuid` crate to generate the uuid for the config
 
-### Pulling minecraft core jar
-**Vanilla**
-- Get the version json from [Java Manifest for vanilla servers](https://piston-meta.mojang.com/mc/game/version_manifest_v2.json) under and its url from `url` json field
-- Get the server download url from `downloads.server.url`
-- Download the server
+## Related
 
-**Paper**
-- Get available Minecraft versions from the [Paper Downloads API](https://fill.papermc.io/v3/projects/paper) under `versions`
-- Get builds for the selected version from `https://fill.papermc.io/v3/projects/paper/versions/{minecraft_version}/builds`
-- Select the newest build whose `channel` is `STABLE`
-- Get the server download URL from `downloads["server:default"].url`
-- Download the server JAR
-- Include a descriptive `User-Agent` containing the application name, version, and contact URL or email in every API request, as [required by PaperMC](https://docs.papermc.io/misc/downloads-service/)
-
-**Fabric**
-- Get supported Minecraft versions from the [Fabric Meta API](https://meta.fabricmc.net/v2/versions/game)
-- Get compatible Fabric Loader versions from `https://meta.fabricmc.net/v2/versions/loader/{minecraft_version}`
-- Select the newest stable loader from `loader.version`
-- Get available Fabric Installer versions from `https://meta.fabricmc.net/v2/versions/installer`
-- Select the newest stable installer from `version`
-- Construct the server launcher URL as `https://meta.fabricmc.net/v2/versions/loader/{minecraft_version}/{loader_version}/{installer_version}/server/jar`
-- Download the Fabric server launcher JAR
-
-Fabric’s downloaded JAR is a launcher: on first run, it downloads the required Minecraft server and Fabric files. It can still be treated as the server’s main executable JAR. See the [Fabric server installation documentation](https://wiki.fabricmc.net/install#server_simple_method).
+- [Configuration](../../architecture/configuration.md)
+- [Artifact acquisition](../../architecture/artifact-acquisition.md)
+- [Filesystem layout](../../architecture/filesystem-layout.md)
+- [Validation](../../architecture/validation.md)
+- [Sync command](sync.md)
+- [Start command](start.md)

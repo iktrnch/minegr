@@ -23,12 +23,18 @@ A missing or unresponsive daemon prints only:
 ```text
 Status: stopped
 ```
+When the daemon remains after an unexpected Java exit or failed restart, print its recorded safe failure reason:
+```text
+Status: failed
+Failure: <reason>
+```
 ## Workflow
 1. Load the configuration and connect to its daemon.
 2. Request the current state and Java process metrics.
 3. Print the snapshot and exit.
 ## Rules
 - Show metrics whenever Java is alive, including while starting or stopping.
+- Show the recorded failure reason instead of process metrics when state is `failed`.
 - Memory is resident memory (RSS), rounded to whole MiB.
 - CPU is rounded to one decimal; `100%` equals one fully used core and may be exceeded.
 - Status requests are read-only and bypass the Console input queue.

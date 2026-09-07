@@ -10,19 +10,21 @@ related_code: []
 
 `minegr backup` creates a ZIP archive of the server's world folders while the server is stopped or running through minegr.
 ## Behaviour
-Prints `Creating backup…`, creates `backups/backup-DD-MM-YYYY-HH-MM.zip`, then prints `Backup created: <path>`.
+Prints `Creating backup…`, creates `backups/backup-DD-MM-YYYY-HH-MM-SS±HHMM.zip`, then prints `Backup created: <path>`.
 
 The timestamp uses local time. Existing backups are never overwritten or removed automatically.
 ## Workflow
-1. Resolve the server root from the canonical configuration path and acquire its backup lock.
+1. Resolve the server root and acquire the operating-system lock on `.minegr/locks/backup.lock`.
 2. Read `level-name` from `server.properties`, defaulting to `world`. Include that folder and any matching `_nether` and `_the_end` folders.
-3. Validate paths, reject a duplicate filename, and ensure the available space can hold the included data.
+3. Validate paths, reject a duplicate filename, and require free space equal to the included data plus 10%.
 4. If the daemon is running, request a live snapshot. Otherwise, verify that no world `session.lock` is active.
 5. Create a temporary ZIP, rename it atomically, and report its path.
 
-For a live snapshot, the daemon runs `save-off` and `save-all flush`, waiting up to five minutes. Console inputs are queued until the backup client finishes or disconnects. The daemon then runs `save-on` before executing every queued input.
+For a live snapshot, earlier Console inputs drain before the daemon runs `save-off` and `save-all flush`, waiting up to five minutes. The operation is then atomic from the daemon's perspective and Console queue consumption pauses. The daemon runs `save-on` before executing later queued input, including after client disconnect or failure.
 ## Rules
 - Only one backup may run per server.
+- A restart requested during backup waits for it. A backup requested while restart is queued or active fails with `RestartInProgress`.
+- Stop waits for the atomic backup to finish unless a second termination signal cancels archiving and triggers recovery.
 - Preserve world directory names at the ZIP root.
 - Include all world data except `session.lock`.
 - Symlinks may resolve only within the canonical server root.
@@ -36,8 +38,10 @@ For a live snapshot, the daemon runs `save-off` and `save-all flush`, waiting up
 - An active `session.lock` belongs to a server not managed by the daemon.
 - Archiving is interrupted or fails.
 
-Failure removes the temporary ZIP. A live backup always restores saving and drains queued Console inputs before returning.
+Failure or client disconnect removes the temporary ZIP. A live backup always restores saving before releasing queued Console inputs. A completed archive contains only world files and never `minegr.toml` or software artifacts.
 ## Implementation
-The CLI owns path validation, size estimation, and ZIP creation. The daemon only controls the live snapshot window and recovers it if the client disconnects.
+The CLI owns path validation, size estimation, and ZIP creation. The daemon controls the live snapshot barrier and recovers it if the client disconnects. The advisory lock file may remain after the operating-system lock is released.
 ## Related
 - [Daemon](../daemon.md)
+- [Operation coordination](../../architecture/operation-coordination.md)
+- [Filesystem layout](../../architecture/filesystem-layout.md)

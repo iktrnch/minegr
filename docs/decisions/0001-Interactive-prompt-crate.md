@@ -5,6 +5,9 @@ created: 2026-08-24
 supersedes: []
 superseded_by: ["0003"]
 ---
+
+# Use Inquire for interactive prompts
+
 ## Context
 
 `minegr init` requires interactive prompts for configuration values not supplied through CLI flags. These prompts include text input, platform and version selection, typed numeric input, validation, default values, help messages, and confirmations.
@@ -77,7 +80,7 @@ The choice is based primarily on maintainability and developer experience rather
 - Replacing it later would require changing the interactive input layer.
 - Non-interactive execution must be implemented separately through `clap`; `inquire` does not replace argument parsing.   
 ## Related
-- `minegr init` command specification.
-- `clap` command-line argument parsing.
-- `minegr.toml` configuration format.
-- Non-interactive initialization behaviour.
+- [Init command](../features/commands/init.md)
+- [Use Dialoguer for interactive prompts](0003-use-dialoguer-for-interactive-prompts.md)
+- [Commands](../architecture/commands.md)
+- [Configuration](../architecture/configuration.md)
