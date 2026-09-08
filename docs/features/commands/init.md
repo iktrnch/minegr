@@ -1,8 +1,16 @@
 ---
 type: feature
-status: unimplemented
+status: implemented
 created: 2026-08-24
-related_code: []
+related_code:
+  - src/init.rs
+  - src/artifact.rs
+  - src/managed_files.rs
+  - src/lib.rs
+  - tests/init.rs
+  - tests/existing_init.rs
+  - tests/artifact.rs
+  - tests/managed_files.rs
 ---
 
 # init-command
@@ -78,7 +86,7 @@ With an existing configuration, normal `init` validates it and creates only miss
 
 ## Implementation
 
-Clap populates an `InitConfig` questionnaire. `create_config(InitConfig)` derives the runtime `Config`, writes it, and returns it for validation. Normal existing-file initialization loads `Config` and materializes missing files. Artifact and validation details remain in their architecture documents.
+Clap populates `InitArgs`. `run_new_init` collects any missing interactive values and derives the complete runtime `Config`; `run_existing_init` either materializes the pinned configuration or performs the UUID-only rewrite. Before materialization, init checks the server root, available memory and disk space, configured port, session lock, and Java compatibility. Artifact, Java, prompting, host-validation, and running-state side effects enter through focused interfaces so the workflows remain deterministic under test. UUID rewrites are bound to the identity of the configuration file that was loaded and validated.
 
 On success, print:
 

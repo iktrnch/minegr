@@ -1,8 +1,14 @@
 ---
 type: feature
-status: unimplemented
+status: implemented
 created: 2026-09-07
-related_code: []
+related_code:
+  - src/sync.rs
+  - src/managed_files.rs
+  - src/config_write.rs
+  - src/lib.rs
+  - tests/sync.rs
+  - tests/cli.rs
 ---
 
 # sync-command
@@ -24,10 +30,11 @@ It is one-way from the Minecraft-managed file into `minegr.toml`. It does not ap
 ## Workflow
 
 1. Load and validate `minegr.toml`.
-2. Verify that neither a matching daemon nor an unmanaged Minecraft server is running.
+2. Verify against the configured properties that neither a matching daemon nor an unmanaged Minecraft server is running.
 3. Parse all of `server.properties`.
 4. Convert recognized properties to their typed TOML values and retain unknown values as strings.
-5. Replace `[minecraft.properties]` and atomically rewrite the configuration.
+5. Repeat the stopped-server check with the persisted `level-name` and `server-port` values.
+6. Replace `[minecraft.properties]` and atomically rewrite the configuration only if the selected configuration file is still the one that was loaded and validated.
 
 ## Rules
 
@@ -48,7 +55,7 @@ No partial property table is written on failure.
 
 ## Implementation
 
-Use a document-preserving TOML editor to change only `[minecraft.properties]`. Parse before creating the adjacent temporary output file, then flush and rename it.
+`run_sync` checks stopped state through an injected host probe before and after parsing the persisted properties, reads the managed source without following a final symlink, and uses a document-preserving TOML editor to replace only `[minecraft.properties]`. The owner-only atomic writer binds publication to the loaded file identity, creates output only after parsing succeeds, then flushes and renames it.
 
 ## Related
 
@@ -57,4 +64,3 @@ Use a document-preserving TOML editor to change only `[minecraft.properties]`. P
 - [Validation](../../architecture/validation.md)
 - [Init command](init.md)
 - [Addon configuration proposal](../../proposals/addon-configuration.md)
-

@@ -9,8 +9,8 @@ use minegr::config::{
 };
 use minegr::config_path::{ConfigPath, resolve_creation_path, resolve_existing_path};
 use minegr::config_write::{
-    AtomicWriteOps, PublishError, TargetKind, TargetMetadata, WriteMode, write_config,
-    write_config_with,
+    AtomicWriteOps, PublishError, ReplacementTarget, TargetKind, TargetMetadata, WriteMode,
+    write_config, write_config_with,
 };
 
 fn config(name: &str) -> Config {
@@ -222,7 +222,7 @@ impl AtomicWriteOps for FakeOps {
         _from: &Path,
         _to: &Path,
         mode: WriteMode,
-        expected: Option<TargetMetadata>,
+        expected: Option<ReplacementTarget>,
     ) -> Result<(), PublishError> {
         if self.failure == FailurePoint::Rename {
             Err(PublishError::BeforePublication(io::Error::other(
@@ -235,7 +235,8 @@ impl AtomicWriteOps for FakeOps {
                 "injected post-exchange failure",
             )))
         } else if mode == WriteMode::Replace
-            && self.target_at_publish.unwrap_or(self.target) != expected
+            && self.target_at_publish.unwrap_or(self.target)
+                != expected.map(|target| target.metadata)
         {
             self.target_published = false;
             self.displaced_retained = false;

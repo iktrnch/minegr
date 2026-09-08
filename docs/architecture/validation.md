@@ -20,7 +20,7 @@ Define deterministic configuration and host checks shared by Commands.
 
 Validators implement a shared trait and return structured errors and warnings. Validation is not represented by one mutable validator object. Independent checks run even when another check fails; a check whose prerequisite failed is skipped with one explanation.
 
-Command adapters perform read-only host probes and supply each check as `Passed`, `Failed(reason)`, or `Unavailable(reason)`. The validation layer orders those observations, applies exact check-and-subject prerequisites, and converts failures or unavailable observations into blocking findings. Live discovery and mutation remain outside the side-effect-free validator.
+Command adapters perform read-only host probes and supply each check as `Passed`, `Failed(reason)`, or `Unavailable(reason)`. The validation layer orders those observations, applies exact check-and-subject prerequisites, and converts failures or unavailable observations into blocking findings. `init` supplies server-root, memory, usable-disk, port, and active-session observations; artifact publication then verifies that the exact downloaded bytes fit before materialization. Live discovery and mutation remain outside the side-effect-free validator.
 
 Pure validation covers TOML structure, format version, unknown keys, UUID, platform coordinates, checksums, Java arguments, Minecraft properties, and cross-field compatibility. Host validation covers paths, ownership, permissions, Java compatibility, managed artifacts, memory, disk space, ports, active processes, and server-root conflicts.
 

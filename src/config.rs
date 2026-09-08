@@ -9,6 +9,7 @@ use std::path::Path;
 use rustix::fs::{CWD, Mode, OFlags, openat};
 use rustix::process::geteuid;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use thiserror::Error;
 
 use crate::config_path::ConfigPath;
@@ -110,6 +111,23 @@ pub struct LoadedConfig {
     pub owner_uid: u32,
     /// Unix permission bits on the configuration file.
     pub mode: u32,
+    /// Exact UTF-8 source read from the validated file descriptor.
+    pub source: String,
+    /// File identity against which any later atomic rewrite must be conditioned.
+    pub identity: ConfigFileIdentity,
+}
+
+/// Stable identity of the exact configuration file that was loaded and validated.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ConfigFileIdentity {
+    /// Owner ID reported by the opened file.
+    pub owner_uid: u32,
+    /// Filesystem device identity.
+    pub device_id: u64,
+    /// Filesystem inode identity.
+    pub inode: u64,
+    /// SHA-256 digest of exact bytes parsed from the loaded file.
+    pub content_hash: [u8; 32],
 }
 
 /// Metadata used to prove that selection and reading refer to one safe file.
@@ -226,11 +244,19 @@ pub fn load_config_with<O: ConfigLoadOps>(
             expected: CONFIG_VERSION,
         });
     }
+    let content_hash = Sha256::digest(source.as_bytes()).into();
 
     Ok(LoadedConfig {
         config,
         owner_uid: metadata.owner_uid,
         mode: metadata.mode & 0o777,
+        source,
+        identity: ConfigFileIdentity {
+            owner_uid: metadata.owner_uid,
+            device_id: metadata.device_id,
+            inode: metadata.inode,
+            content_hash,
+        },
     })
 }
 

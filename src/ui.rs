@@ -3,7 +3,7 @@
 use std::env;
 
 use console::Style;
-use dialoguer::{Confirm, theme::ColorfulTheme};
+use dialoguer::{Confirm, FuzzySelect, Input, Select, theme::ColorfulTheme};
 use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
 use thiserror::Error;
 
@@ -115,6 +115,48 @@ impl Ui {
             .default(default)
             .interact()
             .map_err(UiError::from)
+    }
+
+    /// Asks for one non-empty text value with a displayed default.
+    pub fn input(&self, prompt: &str, default: &str) -> Result<String, UiError> {
+        if !self.presentation.interactive {
+            return Err(UiError::InteractiveUnavailable);
+        }
+        Input::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .default(default.to_owned())
+            .interact_text()
+            .map_err(UiError::from)
+    }
+
+    /// Asks for one searchable item while showing at most twelve rows.
+    pub fn fuzzy_select(&self, prompt: &str, items: &[String]) -> Result<usize, UiError> {
+        if !self.presentation.interactive {
+            return Err(UiError::InteractiveUnavailable);
+        }
+        FuzzySelect::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .items(items)
+            .max_length(12)
+            .interact()
+            .map_err(UiError::from)
+    }
+
+    /// Asks for one item from a short fixed list.
+    pub fn select(&self, prompt: &str, items: &[String]) -> Result<usize, UiError> {
+        if !self.presentation.interactive {
+            return Err(UiError::InteractiveUnavailable);
+        }
+        Select::with_theme(&ColorfulTheme::default())
+            .with_prompt(prompt)
+            .items(items)
+            .interact()
+            .map_err(UiError::from)
+    }
+
+    /// Writes an unstyled informational block to stderr.
+    pub fn message(&self, message: &str) {
+        eprintln!("{message}");
     }
 }
 

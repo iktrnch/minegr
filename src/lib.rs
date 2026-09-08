@@ -1,10 +1,14 @@
 //! Shared Minegr CLI foundations.
 
+pub mod artifact;
 pub mod cli;
 pub mod config;
 pub mod config_path;
 pub mod config_write;
 pub mod error;
+pub mod init;
+pub mod managed_files;
+pub mod sync;
 pub mod ui;
 pub mod validation;
 
@@ -15,6 +19,11 @@ use cli::Command;
 use config::load_config;
 use config_path::{ConfigPathError, resolve_creation_path, resolve_existing_path};
 use error::AppError;
+use init::{
+    SystemInitHostValidator, SystemJavaRuntime, SystemRunningInstanceProbe, run_existing_init,
+    run_new_init,
+};
+use sync::{SystemStoppedServerProbe, run_sync};
 use ui::Ui;
 use validation::{
     ConfigFileObservation, FileKind, HostValidationInput, Observation, validate_config,
@@ -34,6 +43,31 @@ pub fn dispatch(cli: Cli, ui: &Ui) -> Result<(), AppError> {
     }
     .map_err(|error| path_error(&cli, error))?;
 
+    if let Command::Init(arguments) = &cli.command
+        && !arguments.uuid
+        && !resolved.as_path().exists()
+    {
+        let artifacts = artifact::ArtifactService::official()
+            .map_err(|error| AppError::Operation(error.to_string()))?;
+        let output = run_new_init(
+            arguments,
+            &resolved,
+            ui,
+            &artifacts,
+            &SystemJavaRuntime,
+            &SystemInitHostValidator,
+        )
+        .map_err(|error| {
+            if error.is_usage() {
+                AppError::Usage(error.to_string())
+            } else {
+                AppError::Operation(error.to_string())
+            }
+        })?;
+        print!("{}", output.stdout());
+        return Ok(());
+    }
+
     if !matches!(cli.command, Command::Init(ref arguments) if !arguments.uuid)
         || resolved.as_path().exists()
     {
@@ -44,6 +78,15 @@ pub fn dispatch(cli: Cli, ui: &Ui) -> Result<(), AppError> {
             ))
         })?;
         let mut report = validate_config(&loaded.config);
+        let checks = if matches!(cli.command, Command::Init(ref arguments) if !arguments.uuid) {
+            let root = resolved
+                .as_path()
+                .parent()
+                .expect("a resolved configuration path always has a parent");
+            SystemInitHostValidator.host_checks(root, &loaded.config)
+        } else {
+            Vec::new()
+        };
         let host_report = validate_host(
             &HostValidationInput {
                 config_file: ConfigFileObservation {
@@ -52,7 +95,7 @@ pub fn dispatch(cli: Cli, ui: &Ui) -> Result<(), AppError> {
                     expected_uid: loaded.owner_uid,
                     mode: Observation::Known(loaded.mode),
                 },
-                checks: Vec::new(),
+                checks,
             },
             &report,
         );
@@ -70,6 +113,44 @@ pub fn dispatch(cli: Cli, ui: &Ui) -> Result<(), AppError> {
                 "Invalid configuration {}: {errors}",
                 resolved.as_str()
             )));
+        }
+
+        if let Command::Init(arguments) = &cli.command {
+            let artifacts = artifact::ArtifactService::official()
+                .map_err(|error| AppError::Operation(error.to_string()))?;
+            let output = run_existing_init(
+                arguments,
+                &resolved,
+                &loaded,
+                &artifacts,
+                &SystemJavaRuntime,
+                &SystemRunningInstanceProbe,
+                &SystemInitHostValidator,
+            )
+            .map_err(|error| {
+                if error.is_usage() {
+                    AppError::Usage(error.to_string())
+                } else {
+                    AppError::Operation(error.to_string())
+                }
+            })?;
+            print!("{}", output.stdout());
+            return Ok(());
+        }
+
+        if matches!(cli.command, Command::Sync) {
+            let output =
+                run_sync(&resolved, &loaded, &SystemStoppedServerProbe).map_err(|error| {
+                    if error.is_unavailable() {
+                        AppError::Unavailable(error.to_string())
+                    } else if error.is_usage() {
+                        AppError::Usage(error.to_string())
+                    } else {
+                        AppError::Operation(error.to_string())
+                    }
+                })?;
+            print!("{}", output.stdout());
+            return Ok(());
         }
     }
 

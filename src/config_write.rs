@@ -9,10 +9,11 @@ use rustix::fs::{
     AtFlags, FileType, Mode, OFlags, RenameFlags, openat, renameat_with, statat, unlinkat,
 };
 use rustix::process::geteuid;
+use sha2::{Digest, Sha256};
 use thiserror::Error;
 use uuid::Uuid;
 
-use crate::config::Config;
+use crate::config::{Config, ConfigFileIdentity};
 use crate::config_path::ConfigPath;
 
 /// Whether publication must create a new target or replace a safe existing one.
@@ -46,6 +47,15 @@ pub struct TargetMetadata {
     pub inode: u64,
 }
 
+/// Target authorized for replacement, optionally including exact loaded bytes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ReplacementTarget {
+    /// Safe target metadata.
+    pub metadata: TargetMetadata,
+    /// SHA-256 digest required for a loaded-document rewrite.
+    pub content_hash: Option<[u8; 32]>,
+}
+
 /// Whether a publication failure happened before or after an atomic exchange.
 #[derive(Debug)]
 pub enum PublishError {
@@ -76,7 +86,7 @@ pub trait AtomicWriteOps {
         from: &Path,
         to: &Path,
         mode: WriteMode,
-        expected: Option<TargetMetadata>,
+        expected: Option<ReplacementTarget>,
     ) -> Result<(), PublishError>;
     /// Removes a temporary file after a pre-publication failure.
     fn remove_temp(&mut self, path: &Path) -> io::Result<()>;
@@ -228,12 +238,56 @@ pub fn write_config(
     config: &Config,
     mode: WriteMode,
 ) -> Result<(), WriteConfigError> {
+    let source = toml::to_string_pretty(config)?;
+    write_bytes(path, source.as_bytes(), mode)
+}
+
+/// Publishes exact bytes atomically using the same owner-only file guarantees.
+pub fn write_bytes(
+    path: &ConfigPath,
+    source: &[u8],
+    mode: WriteMode,
+) -> Result<(), WriteConfigError> {
     let mut operations = SystemAtomicWriteOps::open(path)?;
     let baseline = match mode {
         WriteMode::Create => None,
-        WriteMode::Replace => Some(verify_selected_target(&mut operations, path)?),
+        WriteMode::Replace => Some(ReplacementTarget {
+            metadata: verify_selected_target(&mut operations, path)?,
+            content_hash: None,
+        }),
     };
-    write_config_with_baseline(&mut operations, path, config, mode, baseline)
+    write_bytes_with_baseline(&mut operations, path, source, mode, baseline)
+}
+
+/// Atomically replaces exact bytes only if the target is the file previously loaded.
+pub fn write_bytes_if_unchanged(
+    path: &ConfigPath,
+    source: &[u8],
+    identity: ConfigFileIdentity,
+) -> Result<(), WriteConfigError> {
+    let baseline = TargetMetadata {
+        kind: TargetKind::Regular,
+        owner_uid: identity.owner_uid,
+        device_id: identity.device_id,
+        inode: identity.inode,
+    };
+    let mut operations = SystemAtomicWriteOps::open(path)?;
+    if verify_selected_target(&mut operations, path)? != baseline {
+        return Err(WriteConfigError::ChangedTarget);
+    }
+    if operations.target_hash(path.as_path())? != identity.content_hash {
+        return Err(WriteConfigError::ChangedTarget);
+    }
+    write_bytes_with_baseline(
+        &mut operations,
+        path,
+        source,
+        WriteMode::Replace,
+        Some(ReplacementTarget {
+            metadata: baseline,
+            content_hash: Some(identity.content_hash),
+        }),
+    )
 }
 
 /// Serializes and publishes a configuration through an injected filesystem boundary.
@@ -243,21 +297,35 @@ pub fn write_config_with<O: AtomicWriteOps>(
     config: &Config,
     mode: WriteMode,
 ) -> Result<(), WriteConfigError> {
-    write_config_with_baseline(operations, path, config, mode, None)
+    let source = toml::to_string_pretty(config)?;
+    write_bytes_with_baseline(operations, path, source.as_bytes(), mode, None)
 }
 
-fn write_config_with_baseline<O: AtomicWriteOps>(
+/// Publishes exact bytes through an injected filesystem boundary.
+pub fn write_bytes_with<O: AtomicWriteOps>(
     operations: &mut O,
     path: &ConfigPath,
-    config: &Config,
+    source: &[u8],
     mode: WriteMode,
-    baseline: Option<TargetMetadata>,
+) -> Result<(), WriteConfigError> {
+    write_bytes_with_baseline(operations, path, source, mode, None)
+}
+
+fn write_bytes_with_baseline<O: AtomicWriteOps>(
+    operations: &mut O,
+    path: &ConfigPath,
+    source: &[u8],
+    mode: WriteMode,
+    baseline: Option<ReplacementTarget>,
 ) -> Result<(), WriteConfigError> {
     let expected = authorize_target(operations, path.as_path(), mode)?;
-    if baseline.is_some() && baseline != expected {
+    if baseline.is_some_and(|baseline| Some(baseline.metadata) != expected) {
         return Err(WriteConfigError::ChangedTarget);
     }
-    let source = toml::to_string_pretty(config)?;
+    let expected = expected.map(|metadata| ReplacementTarget {
+        metadata,
+        content_hash: baseline.and_then(|baseline| baseline.content_hash),
+    });
     let target = path.as_path();
     let parent = target
         .parent()
@@ -278,10 +346,7 @@ fn write_config_with_baseline<O: AtomicWriteOps>(
         ));
     }
 
-    if let Err(error) = file
-        .write_all(source.as_bytes())
-        .and_then(|()| file.flush())
-    {
+    if let Err(error) = file.write_all(source).and_then(|()| file.flush()) {
         drop(file);
         return Err(cleanup_error(
             operations,
@@ -453,6 +518,20 @@ impl SystemAtomicWriteOps {
         path.file_name()
             .expect("a canonical configuration path always names a file")
     }
+
+    fn target_hash(&self, path: &Path) -> Result<[u8; 32], WriteConfigError> {
+        let descriptor = openat(
+            &self.parent,
+            self.name(path),
+            OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW,
+            Mode::empty(),
+        )
+        .map_err(|error| WriteConfigError::Inspect(error.into()))?;
+        let mut file = File::from(descriptor);
+        let mut hash = Sha256::new();
+        io::copy(&mut file, &mut hash).map_err(WriteConfigError::Inspect)?;
+        Ok(hash.finalize().into())
+    }
 }
 
 impl AtomicWriteOps for SystemAtomicWriteOps {
@@ -498,7 +577,7 @@ impl AtomicWriteOps for SystemAtomicWriteOps {
         from: &Path,
         to: &Path,
         mode: WriteMode,
-        expected: Option<TargetMetadata>,
+        expected: Option<ReplacementTarget>,
     ) -> Result<(), PublishError> {
         match mode {
             WriteMode::Create => renameat_with(
@@ -522,7 +601,11 @@ impl AtomicWriteOps for SystemAtomicWriteOps {
                 let displaced = self
                     .inspect_target(from)
                     .map_err(PublishError::AfterExchange)?;
-                if displaced == Some(expected) {
+                let contents_match = expected
+                    .content_hash
+                    .map(|hash| self.target_hash(from).is_ok_and(|actual| actual == hash))
+                    .unwrap_or(true);
+                if displaced == Some(expected.metadata) && contents_match {
                     return Ok(());
                 }
 
