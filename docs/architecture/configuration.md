@@ -46,7 +46,7 @@ white-list = true
 
 `[java]` separates the Java executable, JVM arguments, and server arguments. The executable is optional; omission discovers a compatible `java` from `PATH`. Minegr supplies `-jar ./server.jar` itself and launches Java without a shell. Java is a host prerequisite and Minegr never installs it.
 
-`[minecraft.properties]` maps to `server.properties`. Recognized properties are strongly validated. Unknown properties are allowed as strings, numbers, or booleans for forward compatibility and are preserved when `sync` captures the file. Removing a recognized property from TOML restores its Minecraft default when `server.properties` is next reconstructed.
+`[minecraft.properties]` maps to `server.properties`. Configuration version 1 recognizes `server-port`, `white-list`, and `level-name`; their range, type, and non-empty-name rules are strongly validated. Every other property is unknown to this schema version and is allowed as a string, number, or boolean for forward compatibility. Unknown properties are preserved when `sync` captures the file. Removing a recognized property from TOML restores its Minecraft default when `server.properties` is next reconstructed.
 
 The initial schema does not contain addons, environment interpolation, or platform-specific configuration files. Those require separate future contracts.
 

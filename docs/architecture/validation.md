@@ -20,6 +20,8 @@ Define deterministic configuration and host checks shared by Commands.
 
 Validators implement a shared trait and return structured errors and warnings. Validation is not represented by one mutable validator object. Independent checks run even when another check fails; a check whose prerequisite failed is skipped with one explanation.
 
+Command adapters perform read-only host probes and supply each check as `Passed`, `Failed(reason)`, or `Unavailable(reason)`. The validation layer orders those observations, applies exact check-and-subject prerequisites, and converts failures or unavailable observations into blocking findings. Live discovery and mutation remain outside the side-effect-free validator.
+
 Pure validation covers TOML structure, format version, unknown keys, UUID, platform coordinates, checksums, Java arguments, Minecraft properties, and cross-field compatibility. Host validation covers paths, ownership, permissions, Java compatibility, managed artifacts, memory, disk space, ports, active processes, and server-root conflicts.
 
 ## Data and control flow
@@ -58,4 +60,3 @@ An active `session.lock` or occupied configured port is evidence of a possibly u
 - [Artifact acquisition](artifact-acquisition.md)
 - [Init command](../features/commands/init.md)
 - [Start command](../features/commands/start.md)
-
