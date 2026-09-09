@@ -93,3 +93,13 @@ Pull requests should:
 - Link relevant issues and design documents.
 - Identify breaking CLI or configuration changes.
 - Include terminal output or screenshots for TUI changes.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in Linear through the existing Linear integration. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+This is a single-context repository whose behavioural documentation lives under `docs/`. See `docs/agents/domain.md`.
