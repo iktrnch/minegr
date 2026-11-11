@@ -1,4 +1,18 @@
-# minegr
+<div align="center">
+
+  <img src="./assets/minegr.svg" width="620" alt="minegr logo">
+
+  <p><strong>Run Minecraft servers from the terminal, not a browser panel.</strong></p>
+
+  [![Rust 2024](https://img.shields.io/badge/Rust-2024-000000?style=flat-square&logo=rust&logoColor=white)](./Cargo.toml)
+  [![Platform: Linux](https://img.shields.io/badge/platform-Linux-FCC624?style=flat-square&logo=linux&logoColor=black)](./docs/architecture/filesystem-layout.md)
+  [![Status: pre-alpha](https://img.shields.io/badge/status-pre--alpha-F59E0B?style=flat-square)](#project-status)
+
+  [Overview](#overview) · [Quick start](#quick-start) · [Commands](#commands) · [Configuration](#configuration) · [Development](#development)
+
+</div>
+
+## Overview
 
 > [!Warning]
 > `minegr` is in **very early development**. It is not currently ready for production use, and features, configuration formats, commands, and architecture may change significantly.
