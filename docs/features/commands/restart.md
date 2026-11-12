@@ -2,46 +2,34 @@
 type: feature
 status: unimplemented
 created: 2026-08-24
-related_code: []
-related_docs: []
 ---
-# restart-command
-## Summary
-`minegr restart` replaces the running Java process without replacing its daemon.
-## Behaviour
-Indicatif displays `Stopping server…` and `Starting server…` as active spinners, then leaves each completed line visible:
+
+# Restart command
+
+`minegr restart` replaces Java while retaining its daemon, socket, console clients, and log followers.
+
+1. Reload and validate configuration before touching the running server. UUID and canonical path must stay unchanged.
+2. Wait for backup and drain earlier Console inputs.
+3. Stop Java with the normal shutdown sequence, then wait up to five minutes for new startup readiness.
+4. Resume queued input and report success.
+
+Show stopping and starting progress with Indicatif. Completed lines remain visible:
+
 ```text
 ✔ Server stopped successfully.
 ✔ Server restarted successfully.
 ```
-Redirected output disables animation and prints `Stopping server…`, `Server stopped successfully.`, `Starting server…`, and `Server restarted successfully.` once each.
-## Workflow
-1. Reload and validate the configuration before showing progress.
-2. Wait for an active backup and drain earlier Console inputs.
-3. Stop Java using the normal stop sequence while retaining the daemon and socket.
-4. Start Java and wait up to five minutes for readiness.
-5. Execute Console inputs queued behind restart and report success.
-## Rules
-- Console inputs submitted during restart remain queued until the server is running.
-- Console and `logs --follow` clients remain connected.
-- A second restart client receives `AlreadyInProgress` and exits successfully without joining the operation.
-- A backup requested while restart is queued or active fails with `RestartInProgress`.
-- A stop request cancels pending startup and the restart client reports `CancelledByStop`.
-- `Ctrl+C` closes only the client; restart continues.
-- Forced shutdown prints a warning and continues once Java exits.
-- Existing log followers remain connected, but new history resets to the replacement `logs/latest.log`.
-## Failure cases
-- No daemon is available: `Server is not running`.
-- Invalid reloaded configuration leaves the running server untouched.
-- Shutdown failure prevents startup.
-- Stop cancels the restart.
-- Startup failure leaves the daemon and socket alive in `failed` for inspection or retry.
-Failure prints `Failed to restart server: <reason>` and the last 100 available `latest.log` lines to stderr.
-## Implementation
-The daemon composes its existing stop and start flows while retaining its socket. The client renders phase progress with Indicatif.
+
+Plain output prints each phase and result once. Forced termination warns before startup continues.
+
+Duplicate restart requests return `AlreadyInProgress` successfully. Backup during restart fails with `RestartInProgress`. Stop cancels pending startup with `CancelledByStop`. `Ctrl+C` detaches the client while restart continues.
+
+No daemon reports `Server is not running`. Invalid configuration leaves Java untouched; shutdown failure prevents startup. Startup failure retains the daemon in `failed` for inspection or retry. Report `Failed to restart server: <reason>` and the last 100 available log lines to stderr.
+
 ## Related
 - [Daemon](../daemon.md)
 - [Start command](start.md)
 - [Stop command](stop.md)
 - [Operation coordination](../../architecture/operation-coordination.md)
 - [Logging](../../architecture/logging.md)
+

@@ -2,56 +2,25 @@
 type: feature
 status: unimplemented
 created: 2026-08-24
-related_code: []
-related_docs:
-  - ../daemon.md
-  - minegr.md
 ---
-# status-command
-## Summary
-`minegr status` prints the server state and Java process usage reported by the
-daemon.
-## Behaviour
-The command prints one snapshot and exits:
+
+# Status command
+
+`minegr status` prints one daemon snapshot and exits:
+
 ```text
 Status: running
 Memory usage: 2048 MiB
 CPU usage: 125.4%
 ```
-Supported states are `starting`, `running`, `stopping`, `failed`, and `stopped`.
-A missing or unresponsive daemon prints only:
-```text
-Status: stopped
-```
-When the daemon remains after an unexpected Java exit or failed restart, print its recorded safe failure reason:
-```text
-Status: failed
-Failure: <reason>
-```
-## Workflow
-1. Load the configuration and connect to its daemon.
-2. Request the current state and Java process metrics.
-3. Print the snapshot and exit.
-## Rules
-- Show metrics whenever Java is alive, including while starting or stopping.
-- Show the recorded failure reason instead of process metrics when state is `failed`.
-- Memory is resident memory (RSS), rounded to whole MiB.
-- CPU is rounded to one decimal; `100%` equals one fully used core and may be exceeded.
-- Status requests are read-only and bypass the Console input queue.
-- Every reported state exits with code `0`.
-## Failure cases
-- A protocol or daemon identity mismatch fails with a non-zero exit.
-- If a live process metric is unavailable, print `unavailable`, then report its error on stderr after the status block. The command still exits with code `0`:
-```text
-Status: running
-Memory usage: unavailable
-CPU usage: 125.4%
 
-Error: failed to read memory usage: <reason>
-```
-- If both metrics are unavailable, report separate errors in memory-then-CPU order.
-## Implementation
-The daemon reads the Java process state, RSS, and CPU usage. The client formats the response without sending anything to the Minecraft console. The same IPC port provides a state-only subscription for the console TUI.
+States are `starting`, `running`, `stopping`, `failed`, and `stopped`. A missing or unresponsive daemon prints only `Status: stopped`. A retained failed daemon prints `Status: failed` and `Failure: <reason>`.
+
+Show metrics whenever Java is alive. Memory is RSS rounded to whole MiB; CPU has one decimal, with `100%` representing one core. An unavailable metric prints `unavailable` and an explanatory stderr error.
+
+Status is read-only, bypasses Console input, and exits `0` for every reported state, including missing metrics. Protocol or identity mismatch fails. The console uses the same IPC port for state-only subscriptions.
+
 ## Related
 - [Daemon](../daemon.md)
 - [Minegr command](minegr.md)
+

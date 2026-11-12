@@ -1,5 +1,13 @@
 # Documentation Index
 
+These documents define the planned MVP; the Rust implementation is still a
+skeleton. Architecture records own shared rules, and feature records describe
+commands and user-visible behaviour. All documented commands remain in scope.
+
+Proposals are deferred ideas, not MVP requirements. ADRs preserve decision
+history; ADR 0001 is superseded by ADR 0003. For implementation details, code
+and tests remain authoritative.
+
 ## General
 
 - [Glossary](glossary.md)
@@ -49,3 +57,4 @@
 
 - [Addon configuration](proposals/addon-configuration.md)
 - [Cross-version stop](proposals/cross-version-stop.md)
+

@@ -6,61 +6,29 @@ created: 2026-09-07
 
 # Filesystem layout
 
-## Purpose
+The selected configuration's canonical parent is the server root and Java's working directory.
 
-Define the files Minegr owns and the boundary between declarative configuration, generated files, and mutable Minecraft state.
+| Path under server root | Owner and purpose |
+| --- | --- |
+| `minegr.toml` (default name) | Declarative instance configuration |
+| `server.jar`, `server.properties`, `eula.txt` | Managed files materialized by `init` |
+| World directories | Minecraft mutable state |
+| `logs/` | Minecraft logs |
+| `backups/` | World ZIP archives |
+| `.minegr/locks/backup.lock` | Advisory backup lock |
+| `.minegr/logs/` | Daemon diagnostics |
 
-## Responsibilities
+Minecraft keeps its conventional layout. `init` creates missing managed files without replacing differing files or mutable state. `sync` reads properties into configuration.
 
-- Give managed files stable locations.
-- Keep Minecraft's normal root layout usable by external tools.
-- Constrain paths, permissions, temporary files, and atomic publication.
+## File safety
 
-## Structure
+- Keep managed paths inside the canonical root. Backup symlinks must resolve inside it.
+- Configuration, backups, sockets, and Minegr-private files are owner-only.
+- Download into a unique owner-only system temporary directory.
+- Publish files through an adjacent temporary file, flush, and atomic rename; never expose partial output.
+- The operating-system lock determines whether backup is active; the lock file may remain after release.
 
-```text
-<server-root>/
-├── minegr.toml              # selected config; this is the default name
-├── server.jar
-├── server.properties
-├── eula.txt
-├── backups/
-├── logs/                    # Minecraft-owned
-├── <world directories>/    # mutable state
-└── .minegr/
-    ├── locks/backup.lock
-    └── logs/                # daemon tracing logs
-```
-
-The canonical parent of the selected `minegr.toml` is `<server-root>`. Java runs with that directory as its working directory. Minegr supplies `./server.jar`; Minecraft retains its conventional paths for worlds, configuration, and logs.
-
-Downloads use a unique owner-only system temporary directory. Files requiring atomic publication are copied to a temporary file beside their destination, flushed, and renamed.
-
-## Data and control flow
-
-`init` materializes missing `server.jar`, `server.properties`, and `eula.txt`. It refuses to overwrite a differing managed file. `sync` reads `server.properties` into `minegr.toml`. Minecraft owns mutable data and its `logs/` directory. The daemon owns `.minegr/logs/` and the backup lock.
-
-Backups are published under `backups/` as `backup-DD-MM-YYYY-HH-MM-SS±HHMM.zip`. A collision fails instead of overwriting or adding a suffix.
-
-## Interfaces
-
-### Inputs
-
-- One canonical configuration path.
-- Managed relative paths and Minecraft-created state.
-
-### Outputs
-
-- Stable locations used by commands, Java, and external tools.
-
-## Invariants
-
-- Managed paths may not traverse or resolve outside the canonical server root.
-- Symlinks included in backups must resolve within the server root.
-- `minegr.toml`, backup archives, runtime sockets, and Minegr-private files are owner-only.
-- `.minegr/locks/backup.lock` is an advisory lock location, not proof that a backup is active; the operating-system lock is authoritative.
-- Temporary and partial artifacts never appear at a final managed path.
-- Mutable state is never removed or overwritten by `init` or `sync`.
+Backup names use local time: `backup-DD-MM-YYYY-HH-MM-SS±HHMM.zip`. Never overwrite an existing archive.
 
 ## Related
 
@@ -68,3 +36,4 @@ Backups are published under `backups/` as `backup-DD-MM-YYYY-HH-MM-SS±HHMM.zip`
 - [Artifact acquisition](artifact-acquisition.md)
 - [Logging](logging.md)
 - [Backup command](../features/commands/backup.md)
+
