@@ -4,20 +4,14 @@ status: unimplemented
 created: <% tp.date.now("YYYY-MM-DD") %>
 ---
 # <% tp.file.title %>
-## Summary
-What does this feature provide?
+
+State what the user can do.
+
 ## Behaviour
-Describe the externally observable behaviour.
-## Workflow
-1. 
-2. 
-3. 
+Describe options, defaults, the main workflow, and observable results.
+
 ## Rules
-- 
-## Failure cases
-- 
-## Implementation
-Briefly describe the major components involved.
-Do not duplicate implementation details that are obvious from the source code.
+Include failures that affect implementation or user recovery. Link shared architecture rules; omit speculative cases.
+
 ## Related
-- 
+-

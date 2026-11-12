@@ -2,89 +2,46 @@
 type: feature
 status: unimplemented
 created: 2026-08-27
-related_code: []
 ---
-# minegr-command
 
-## Summary
+# Minegr command
 
-`minegr` selects a configuration file and dispatches a server-management command.
-
-### Global options
-
-| Option | Description | Mandatory |
-| --- | --- | --- |
-| `--config <path>` | Direct path to the configuration file. Defaults to `minegr.toml`. | No |
-
-### Subcommands
-
-| Command | Purpose |
-| --- | --- |
-| `init` | Create or materialize an instance. |
-| `sync` | Capture stopped-server properties into `minegr.toml`. |
-| `start` | Start Java through the per-server daemon. |
-| `stop` | Stop Java and its daemon. |
-| `restart` | Replace Java while retaining the daemon. |
-| `status` | Print lifecycle state and process usage. |
-| `logs` | Read or follow Minecraft's current log through the daemon. |
-| `console` | Open the interactive server console. |
-| `backup` | Archive mutable world files. |
-
-## Behaviour
-
-All subcommands accept the global option after their name:
+`minegr` selects an instance and dispatches a command. Global `--config <path>` defaults to `./minegr.toml` and works before or after the subcommand:
 
 ```text
 minegr start --config ./servers/survival/minegr.toml
 minegr logs --config ./servers/survival/minegr.toml --follow
 ```
 
-Relative paths resolve from the current directory. The configuration file's parent directory is the server root.
+Resolve relative paths from the working directory without searching parents. The canonical UTF-8 configuration path determines the server root. `init` requires an existing parent and may create that exact file; other commands require the file.
 
-## Workflow
+## Commands
 
-1. Parse the command and global configuration path.
-2. Resolve the path without searching parent directories.
-3. Pass the resolved path to the selected command.
+| Command | Purpose |
+| --- | --- |
+| [init](init.md) | Create configuration or materialize missing files |
+| [sync](sync.md) | Capture stopped-server properties into configuration |
+| [start](start.md) | Start Java through its daemon |
+| [stop](stop.md) | Stop Java and the daemon |
+| [restart](restart.md) | Replace Java while retaining the daemon |
+| [status](status.md) | Print state and process usage |
+| [logs](logs.md) | Read or follow the current Minecraft log |
+| [console](console.md) | Open the interactive console |
+| [backup](backup.md) | Archive world files |
 
-## Rules
+Command data uses stdout; progress, warnings, and errors use stderr. Stdout and exit codes support scripting; the TUI does not.
 
-- Every subcommand must honor the selected configuration path.
-- The resolved canonical configuration path must be valid UTF-8.
-- `init` creates that exact file; other commands require it to exist.
-- `init` requires the parent directory to exist.
-- `sync` is the only Command that reads Minecraft-managed configuration back into `minegr.toml`.
-- Stdout data and process exit codes are stable scripting interfaces. Progress, warnings, and diagnostics use stderr. TUI presentation is not a scripting interface.
-
-### Exit codes
+## Exit codes
 
 | Code | Meaning |
 | --- | --- |
-| `0` | Success, normal stream closure, or successful client detachment. |
-| `2` | Usage or configuration error. |
-| `3` | Requested server or daemon is unavailable. |
-| `4` | An accepted operation failed. |
-| `130` | Foreground work was interrupted and cancelled. |
+| `0` | Success, normal stream closure, or client detachment |
+| `2` | Usage or configuration error |
+| `3` | Server or daemon unavailable |
+| `4` | Accepted operation failed |
+| `130` | Foreground work interrupted and cancelled |
 
-Clap parse errors keep Clap's standard exit behaviour.
-
-## Failure cases
-
-- A configuration file is missing, unreadable, not a regular file, or invalid:
-
-```text
-Failed to load configuration <path>: <reason>
-```
-
-- The resolved path is not valid UTF-8:
-
-```text
-Configuration path is not valid UTF-8: <path>
-```
-
-## Implementation
-
-Clap defines `--config` once on the root parser with `global = true`; command-specific options remain on their subcommands.
+Clap retains its standard parse-error behaviour. Configuration errors name the path and reason. Define `--config` once with Clap's `global = true`.
 
 ## Related
 
@@ -92,3 +49,4 @@ Clap defines `--config` once on the root parser with `global = true`; command-sp
 - [Sync command](sync.md)
 - [Start command](start.md)
 - [Commands architecture](../../architecture/commands.md)
+

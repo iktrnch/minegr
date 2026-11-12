@@ -6,50 +6,23 @@ created: 2026-09-07
 
 # Validation
 
-## Purpose
+Shared validators return structured errors and warnings without side effects. Use a common trait with focused validators, not one mutable validator object.
 
-Define deterministic configuration and host checks shared by Commands.
+## Checks
 
-## Responsibilities
+| Stage | Checks |
+| --- | --- |
+| Every command | TOML schema, version, UUID, platform coordinates, checksum format, Java arguments, Minecraft properties, and cross-field compatibility |
+| `init`, `start`, `restart` | Applicable paths, ownership, permissions, Java compatibility, artifacts, memory, disk, ports, active processes, and root conflicts |
+| `sync` | Stopped server and a complete, valid `server.properties` |
 
-- Separate pure configuration checks from host-dependent checks.
-- Report all independent findings in a stable order.
-- Prevent destructive adoption, invalid launches, and unsafe file access.
+Report independent findings in a stable order; skip checks whose prerequisites failed. Errors block execution. Warnings use stderr; a risky operation requires its specific confirmation or force option, not blanket `--yes` consent.
 
-## Structure
+Reject incompatible Java, unknown Minegr keys, checksum mismatches, foreign-owned or non-regular configuration, and differing managed files. Broader configuration permissions warn. Name conflicting files and tell users to remove them before retrying `init`; never infer new pins from an existing JAR.
 
-Validators implement a shared trait and return structured errors and warnings. Validation is not represented by one mutable validator object. Independent checks run even when another check fails; a check whose prerequisite failed is skipped with one explanation.
+An active world `session.lock` or occupied configured port may indicate an unmanaged server. Reject the conflicting operation, explain how to inspect it, and never signal that process. Unavailable host checks do not imply success.
 
-Pure validation covers TOML structure, format version, unknown keys, UUID, platform coordinates, checksums, Java arguments, Minecraft properties, and cross-field compatibility. Host validation covers paths, ownership, permissions, Java compatibility, managed artifacts, memory, disk space, ports, active processes, and server-root conflicts.
-
-## Data and control flow
-
-Every Command performs pure validation. `init`, `start`, and `restart` also run the applicable host checks. `sync` requires the server to be stopped, parses all of `server.properties`, and writes nothing when any property is duplicate or malformed.
-
-Errors block the operation. Warnings are written to stderr and do not block unless a specific risky operation explicitly requires confirmation. Non-interactive callers use the operation's explicit force option rather than treating `--yes` as universal consent.
-
-An active `session.lock` or occupied configured port is evidence of a possibly unmanaged server. Minegr refuses the conflicting operation, never signals an unmanaged process, and reports how to inspect it.
-
-## Interfaces
-
-### Inputs
-
-- Parsed configuration and canonical server-root paths.
-- Host files, Java metadata, process indicators, port state, memory, and disk state.
-
-### Outputs
-
-- Ordered structured errors and warnings.
-- A validated value for command execution.
-
-## Invariants
-
-- Validation has no side effects.
-- Assertions are not weakened because a host check is unavailable.
-- Unknown Minegr keys, incompatible Java, checksum mismatch, and conflicting managed files are errors.
-- Broader-than-owner configuration permissions are warnings; foreign ownership and non-regular files are errors.
-- A manually replaced `server.jar` never changes pinned coordinates automatically.
-- `init` names a differing managed file and tells the user to remove it before retrying; it never overwrites it.
+`sync` rejects duplicate or malformed properties and writes nothing on failure.
 
 ## Related
 
@@ -58,4 +31,5 @@ An active `session.lock` or occupied configured port is evidence of a possibly u
 - [Artifact acquisition](artifact-acquisition.md)
 - [Init command](../features/commands/init.md)
 - [Start command](../features/commands/start.md)
+
 

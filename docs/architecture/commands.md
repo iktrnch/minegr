@@ -5,67 +5,27 @@ created: 2026-08-27
 ---
 
 # Commands
-## Purpose
-Define how the CLI selects configuration, dispatches commands, and presents consistent terminal output.
-## Responsibilities
-- Parse commands and the global `--config` option with Clap.
-- Resolve the configuration path, validate its format version, and deserialize `minegr.toml` with TOML and Serde.
-- Dispatch synchronous command handlers with their configuration context.
-- Keep prompts and human-facing output consistent through shared UI wrappers.
-## Structure
-- The entry point performs startup and delegates dispatch.
-- The parser owns global and command-specific arguments.
-- The dispatcher resolves the configuration path, loads `Config`, and calls the selected handler.
-- Command modules own command behaviour. Large handlers use focused helpers.
-- The UI module wraps a fixed semantic subset of Dialoguer and Indicatif: prompts, progress, success, warning, and error.
 
-Normal handlers receive a context containing the canonical configuration path and deserialized `Config`. Operations that benefit from async I/O create one Tokio runtime for that invocation; dispatch remains synchronous.
-## Data and control flow
-```mermaid
-flowchart TD
-    A[Parse CLI] --> B[Resolve config path]
-    B --> C{Command}
-    C -->|init| D{--uuid?}
-    D -->|no| E{Config exists?}
-    E -->|no| F[Fill InitConfig form]
-    E -->|yes| M[Materialize missing files]
-    F --> G[Write TOML atomically and return Config]
-    G --> M
-    D -->|yes| H[Load Config]
-    H --> I[Replace UUID and write atomically]
-    C -->|non-mutating| J[Load Config]
-    C -->|sync| N[Load Config and server.properties]
-    N --> O[Replace minecraft.properties]
-    J --> K[Build command context]
-    K --> L[Run handler]
-```
-Clap supplies `--config <path>` or defaults it to `./minegr.toml`. Relative paths resolve from the current directory. Existing files are canonicalized directly; `init` canonicalizes the existing parent before appending the new filename. The resulting configuration path must be valid UTF-8 for every Command, including `init`.
+Clap parses commands and the global `--config <path>` option, defaulting to `./minegr.toml`. Resolve relative paths from the working directory without searching parents. Canonicalize existing files; for new configuration, canonicalize the existing parent and append the filename. Require a UTF-8 path.
 
-New-instance `init` skips configuration loading. Focused helpers receive a shared mutable `InitConfig` questionnaire and fill it from CLI values or Dialoguer prompts. `create_config` derives the complete runtime `Config`, writes it, and returns it for validation. Normal `init` with an existing configuration materializes only missing managed files. `init --uuid` instead loads the existing `Config`, changes only its UUID, and rewrites it. `sync` is the other mutating Command and replaces only `[minecraft.properties]` from `server.properties`.
+## Dispatch
 
-Configuration writes use a temporary file beside the target, flush it, and rename it atomically. Normal `init` never replaces an existing file. Mutation commands preserve comments and formatting outside changed values on a best-effort basis; correct atomic output takes precedence.
+Keep startup and dispatch in `main.rs`, command handlers in focused modules, and shared terminal operations in a UI module.
 
-Handlers return structured errors. The dispatcher renders the final error once and selects the exit code.
+Normal handlers receive the canonical path and a deserialized `Config` using TOML and Serde. New-instance `init` fills an `InitConfig` from flags or prompts; `create_config` writes and returns the resulting `Config`. Existing-file `init` loads it to materialize missing files.
 
-Stable exit categories map success to `0`, usage or configuration failure to `2`, an unavailable server to `3`, an accepted operation failure to `4`, and a foreground interruption to `130`. Clap parse errors retain Clap's standard exit behaviour. Commands for which `Ctrl+C` means successful detachment or normal stream closure return `0`.
-## Interfaces
-### Inputs
-- Parsed global and command-specific arguments.
-- One selected `minegr.toml` file, except while normal `init` creates it.
-- Interactive answers when required outside CI.
-### Outputs
-- Command data on stdout.
-- Prompts, progress, warnings, and errors on stderr.
-- A new or atomically replaced `minegr.toml` from `init` or `sync`.
-## Invariants
-- `minegr.toml` is the single configuration source; loading uses TOML and Serde without layered configuration.
-- The centrally resolved canonical configuration path is valid UTF-8 before any Command loads or creates configuration.
-- Only `init` may create configuration. Normal existing-file `init`, `init --uuid`, and `sync` load it for their distinct operations.
-- Direct Dialoguer or Indicatif use is confined to the UI module. Raw logs, status data, and Ratatui rendering are explicit exceptions.
-- UI callers choose semantic operations, not colors, glyphs, or spinner templates.
-- Pretty output requires its destination stream to be a terminal and is disabled when `CI` is `1`, `true`, or `yes`, case-insensitively. Plain output prints every message once without terminal control sequences.
-- `NO_COLOR` disables color without disabling other terminal presentation.
-- Interactive prompts require terminal stdin and stderr and are forbidden in CI. Missing answers produce an actionable error naming the required flags.
+Dispatch is synchronous. Daemon and socket operations use Tokio, with one runtime per invocation. Handlers return structured errors; dispatch renders the final error once and selects the [exit code](../features/commands/minegr.md#exit-codes).
+
+## Terminal output
+
+- Send command data to stdout; prompts, progress, warnings, and errors to stderr.
+- Wrap Dialoguer and Indicatif in semantic UI operations: prompt, progress, success, warning, and error. Callers do not choose styling. Raw logs, status data, and Ratatui rendering use their own output paths.
+- Enable terminal presentation only for a terminal destination and outside CI. Treat `CI=1`, `true`, or `yes` case-insensitively as CI.
+- Plain output prints each message once without control sequences. `NO_COLOR` disables color.
+- Prompts require terminal stdin and stderr and are disabled in CI. Missing answers produce an error naming the required flags.
+
+Configuration writes and validation follow the shared contracts below.
+
 ## Related
 - [Configuration](configuration.md)
 - [Minegr command](../features/commands/minegr.md)
@@ -74,3 +34,4 @@ Stable exit categories map success to `0`, usage or configuration failure to `2`
 - [Validation](validation.md)
 - [Use Dialoguer for interactive prompts](../decisions/0003-use-dialoguer-for-interactive-prompts.md)
 - [Sync vs async](../decisions/0002-sync-vs-async.md)
+

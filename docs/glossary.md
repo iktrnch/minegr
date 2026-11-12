@@ -6,37 +6,20 @@ created: 2026-08-31
 
 # Glossary
 
-## Command
+| Term | Meaning |
+| --- | --- |
+| Command | A CLI invocation. Each daemon-backed Command owns one tunnel. |
+| Tunnel | One full-duplex Unix socket connection for a Command session. |
+| Message | A protocol request, response, lifecycle update, or subscription item. |
+| Port | A logical Message route such as `Logs`, `Status`, or `Console`. |
+| Console input | One complete line accepted into the daemon's shared FIFO. |
+| Minegr version | Embedded package version used for exact handshake compatibility; no separate protocol version. |
+| Instance | One configuration and server root, including managed files, mutable state, and an optional daemon. |
+| Managed file | `server.jar`, `server.properties`, or `eula.txt`; `init` creates missing files without overwriting differing ones. |
+| Mutable state | Minecraft data excluded from configuration, such as worlds, player data, access lists, and logs. |
+| Sync | One-way replacement of TOML properties from a stopped server's `server.properties`. |
 
-A user-facing CLI invocation selected through Minegr's command-line parser, such as `minegr start` or `minegr console`. A Command that communicates with the daemon owns one tunnel and may exchange multiple Messages over it.
-
-## Message
-
-One unit of daemon-client protocol communication. Messages carry requests, responses, lifecycle updates, and subscription data over a Command's tunnel.
-
-## Console input
-
-One complete line submitted through a `Console` Message for execution by the Minecraft server. Multiple console clients contribute Console inputs to one daemon-owned FIFO.
-
-## Minegr version
-
-The package version embedded in the binary and carried in each daemon handshake. It currently identifies the wire schema, and Command tunnels require an exact Minegr-version match. Minegr has no separate protocol-version identifier.
-
-## Instance
-
-One server root and its declarative `minegr.toml`, generated managed files, mutable Minecraft state, and optional running daemon. Copying `minegr.toml` is sufficient to recreate its configured initial state, but not its mutable state.
-
-## Managed file
-
-A file Minegr can materialize from `minegr.toml`: initially `server.jar`, `server.properties`, and `eula.txt`. `init` creates a missing managed file but never overwrites a differing one.
-
-## Mutable state
-
-Minecraft data intentionally excluded from `minegr.toml`, including worlds, player data, bans, operators, whitelist entries, logs, crash reports, caches, and runtime metadata.
-
-## Sync
-
-The one-way capture of persisted Minecraft configuration into `minegr.toml`. Initially `minegr sync` replaces `[minecraft.properties]` from a stopped server's `server.properties` and changes no other section.
+Copying configuration recreates the initial setup, not mutable state.
 
 ## Related
 
@@ -45,3 +28,4 @@ The one-way capture of persisted Minecraft configuration into `minegr.toml`. Ini
 - [Configuration](architecture/configuration.md)
 - [Filesystem layout](architecture/filesystem-layout.md)
 - [Use one or two IPC tunnels](decisions/0005-use-one-or-two-ipc-tunnels.md)
+

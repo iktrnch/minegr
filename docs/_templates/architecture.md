@@ -4,23 +4,14 @@ status: current
 created: <% tp.date.now("YYYY-MM-DD") %>
 ---
 # <% tp.file.title %>
-## Purpose
-What part of the system does this document describe?
-## Responsibilities
-- 
-## Structure
-Describe the major components and their relationships.
-## Data and control flow
-Describe how information or control moves through this part of the system.
 
-Use a Mermaid diagram where it makes the architecture substantially clearer.
-## Interfaces
-### Inputs
-- 
-### Outputs
-- 
-## Invariants
-Things that must remain true regardless of implementation details.
-- 
+State this component's purpose, responsibilities, and boundaries.
+
+## Design
+Describe components, interfaces, and the main flow. Add a diagram only if useful.
+
+## Rules
+Record essential constraints. Link shared rules instead of repeating them.
+
 ## Related
-- 
+-
