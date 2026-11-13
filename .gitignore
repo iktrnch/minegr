@@ -2,3 +2,7 @@
 .obsidian
 .agents
 .codex
+config.toml
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
