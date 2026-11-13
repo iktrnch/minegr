@@ -2,6 +2,10 @@ use dialoguer::{Confirm, Input, Select, theme::ColorfulTheme};
 use serde::{Deserialize, Serialize};
 use strum::VariantNames;
 
+use crate::platform::{
+    fabric::select_fabric_version, paper::select_paper_version, vanilla::select_vanilla_version,
+};
+
 #[derive(Debug, strum::Display, strum::EnumString, strum::VariantNames, Deserialize, Serialize)]
 #[strum(serialize_all = "lowercase")]
 pub enum ApplicationType {
@@ -83,6 +87,21 @@ fn minegr() -> Minegr {
     }
 }
 
+/// Selects a Minecraft version for the requested platform.
+fn get_version_from_platform(platform: &Platform) -> String {
+    match platform {
+        Platform::Paper => {
+            select_paper_version().expect("Failed to select a Paper Minecraft release")
+        }
+        Platform::Fabric => {
+            select_fabric_version().expect("Failed to select a stable Fabric Minecraft version")
+        }
+        Platform::Vanilla => {
+            select_vanilla_version().expect("Failed to select a Vanilla Minecraft release")
+        }
+    }
+}
+
 /// Collects the Minecraft platform and EULA acceptance.
 fn minecraft() -> Minecraft {
     let platform_index = Select::with_theme(&ColorfulTheme::default())
@@ -95,7 +114,7 @@ fn minecraft() -> Minecraft {
         .parse()
         .expect("platform variant names must parse as Platform");
 
-    let version = String::new(); // TODO: Implement version selection logic
+    let version = get_version_from_platform(&platform);
     let checksum = String::new(); // TODO: Implement checksum calculation logic
     let eula = Confirm::with_theme(&ColorfulTheme::default())
         .with_prompt("Do you accept the EULA?")

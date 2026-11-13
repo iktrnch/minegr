@@ -10,13 +10,17 @@ Resolve exact server coordinates during `init`, pin them in `minegr.toml`, and r
 
 ## Resolution
 
-Select Minecraft first from Mojang's manifest, then offer platforms available for that version. The searchable picker shows 12 entries, prioritizes recent releases, and reveals snapshots when the search matches their identifiers.
+Select Minecraft first from Mojang's manifest, then offer platforms available for that version. The Vanilla version picker keeps only releases in Mojang's newest-first order. It initially shows the five newest releases; typing fuzzy-searches all releases with at most five matches visible.
 
-| Platform | Metadata and selection |
-| --- | --- |
-| Vanilla | `https://piston-meta.mojang.com/mc/game/version_manifest_v2.json`; follow version metadata to `downloads.server.url` and checksum |
-| Paper | `https://fill.papermc.io/v3/projects/paper` and `/versions/{minecraft_version}/builds`; select the newest `STABLE` build and its `downloads["server:default"]` checksum |
-| Fabric | `https://meta.fabricmc.net/v2/versions/game`, `/loader/{minecraft_version}`, and `/installer`; select stable Loader and Installer versions |
+The Paper version picker flattens the project's version groups, keeps numeric release identifiers, and sorts their components numerically, newest first. It shows five rows and fuzzy-searches the full release list. Build selection remains a separate step.
+
+The Fabric version picker keeps only game versions marked `stable: true`, preserving Fabric's newest-first order. It shows five rows and fuzzy-searches all stable game versions. Loader and Installer selection remain separate steps.
+
+| Platform | Metadata and selection                                                                                                                                                  |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vanilla  | `https://piston-meta.mojang.com/mc/game/version_manifest_v2.json`; follow version metadata to `downloads.server.url` and checksum                                       |
+| Paper    | `https://fill.papermc.io/v3/projects/paper` and `/versions/{minecraft_version}/builds`; select the newest `STABLE` build and its `downloads["server:default"]` checksum |
+| Fabric   | `https://meta.fabricmc.net/v2/versions/game`, `/loader/{minecraft_version}`, and `/installer`; select stable Loader and Installer versions                              |
 
 Paper requests include a descriptive User-Agent with the Minegr version and contact URL or email. Fabric downloads use `https://meta.fabricmc.net/v2/versions/loader/{minecraft_version}/{loader_version}/{installer_version}/server/jar`.
 
