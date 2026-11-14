@@ -83,7 +83,7 @@ impl PlatformProvider for Vanilla {
     }
 
     /// Downloads the exact Vanilla version into a temporary file with its SHA-1 checksum.
-    fn get_core(version: String) -> anyhow::Result<CoreDownload> {
+    fn get_core(version: &str) -> anyhow::Result<CoreDownload> {
         let client = ApiClient::new().context("Failed to build the Vanilla HTTP client")?;
         let manifest = Manifest::fetch(&client).context("Failed to load Vanilla versions")?;
         let entry = manifest
