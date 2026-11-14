@@ -7,6 +7,7 @@ use sha1::{Digest, Sha1};
 use sha2::Sha256;
 use std::fs::File;
 use std::io::{Read, Seek};
+use std::path::Path;
 
 use crate::utils::progress::progress_bar;
 
@@ -29,10 +30,12 @@ impl Platform {
         }
     }
 
-    /// Downloads a core, verifies any upstream checksum, and installs without replacing files.
+    /// Downloads a core, verifies any upstream checksum, and installs `config_dir/server.jar`
+    /// without replacing an existing file.
     /// Returns the checksum if the provider supplies one.
-    pub fn get_core(&self, version: &str) -> anyhow::Result<String> {
-        match std::fs::symlink_metadata("server.jar") {
+    pub fn get_core(&self, version: &str, config_dir: &Path) -> anyhow::Result<String> {
+        let destination = config_dir.join("server.jar");
+        match std::fs::symlink_metadata(&destination) {
             Ok(_) => anyhow::bail!("server.jar already exists; refusing to overwrite it"),
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
             Err(error) => return Err(error).context("Failed to inspect server.jar"),
@@ -65,7 +68,7 @@ impl Platform {
             .rewind()
             .context("Failed to rewind the verified server JAR for installation")?;
 
-        let mut staged = tempfile::NamedTempFile::new_in(".")
+        let mut staged = tempfile::NamedTempFile::new_in(config_dir)
             .context("Failed to create a temporary file beside server.jar")?;
         let copy_progress = progress_bar("Copying", core.size)?;
         std::io::copy(
@@ -78,10 +81,10 @@ impl Platform {
             .sync_all()
             .context("Failed to synchronize the staged server JAR")?;
         staged
-            .persist_noclobber("server.jar")
+            .persist_noclobber(&destination)
             .map_err(|error| error.error)
             .context("Failed to publish server.jar without overwriting an existing file")?;
-        File::open(".")
+        File::open(config_dir)
             .context("Failed to open the server directory for synchronization")?
             .sync_all()
             .context("server.jar was installed, but synchronizing its directory failed")?;

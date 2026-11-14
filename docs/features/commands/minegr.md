@@ -6,14 +6,14 @@ created: 2026-08-27
 
 # Minegr command
 
-`minegr` selects an instance and dispatches a command. Global `--config <path>` defaults to `./minegr.toml` and works before or after the subcommand:
+`minegr` selects an instance and dispatches a command. A global optional positional `[CONFIG_DIR]` defaults to the current directory and can appear before or after any command:
 
 ```text
-minegr start --config ./servers/survival/minegr.toml
-minegr logs --config ./servers/survival/minegr.toml --follow
+minegr start ./servers/survival
+minegr logs ./servers/survival --follow
 ```
 
-Resolve relative paths from the working directory without searching parents. The canonical UTF-8 configuration path determines the server root. `init` requires an existing parent and may create that exact file; other commands require the file.
+Resolve relative directories from the working directory without searching parents. The canonical UTF-8 directory is the server root, and its configuration is always `minegr.toml`. `init` requires an existing directory and may create that file; other commands require the file.
 
 ## Commands
 
@@ -41,7 +41,7 @@ Command data uses stdout; progress, warnings, and errors use stderr. Stdout and 
 | `4` | Accepted operation failed |
 | `130` | Foreground work interrupted and cancelled |
 
-Clap retains its standard parse-error behaviour. Configuration errors name the path and reason. Define `--config` once with Clap's `global = true`.
+Clap retains its standard parse-error behaviour. Configuration errors name the path and reason. The former `--config` and `-c` flags are no longer accepted.
 
 ## Related
 

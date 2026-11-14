@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
 
@@ -75,15 +77,14 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn try_load() -> anyhow::Result<Self> {
-        let config_str =
-            std::fs::read_to_string("minegr.toml").context("Failed to read config file")?;
+    pub fn try_load(path: &Path) -> anyhow::Result<Self> {
+        let config_str = std::fs::read_to_string(path).context("Failed to read config file")?;
         toml::from_str(&config_str).context("Failed to parse config file")
     }
 
-    pub fn try_save(&self) -> anyhow::Result<()> {
+    pub fn try_save(&self, path: &Path) -> anyhow::Result<()> {
         let text = toml::to_string_pretty(&self).context("Failed to parse config into a file")?;
-        std::fs::write("config.toml", text).context("Failed to write config file")?;
+        std::fs::write(path.join("minegr.toml"), text).context("Failed to write config file")?;
         Ok(())
     }
 }

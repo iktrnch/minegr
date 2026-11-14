@@ -6,7 +6,11 @@ created: 2026-08-24
 
 # Init command
 
-`minegr init` creates an instance configuration or materializes missing managed files.
+`minegr init [CONFIG_DIR]` creates an instance configuration or materializes missing managed files. The directory defaults to `.` and must already exist. Configuration is saved as `minegr.toml` inside that directory, alongside the managed server files.
+
+```text
+minegr init ./server --name survival
+```
 
 ## Options
 
@@ -49,7 +53,7 @@ On success:
 
 ```text
 Configuration: <path>
-Start it with: minegr start --config <path>
+Start it with: minegr start <directory>
 ```
 
 ## Related

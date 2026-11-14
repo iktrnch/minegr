@@ -27,13 +27,17 @@ pub struct InitArgs {
     pub accept_eula: Option<bool>,
 }
 
-/// Runs the interactive initialization prompts.
-///
-/// Arguments and the config path are forwarded for future use; initialization
-/// currently uses the existing interactive prompts and save locations.
-pub fn execute(args: &InitArgs, _config_path: &Path) -> anyhow::Result<()> {
+/// Initializes the selected directory, writing minegr.toml and managed server files there.
+pub fn execute(args: &InitArgs, config_dir: &Path) -> anyhow::Result<()> {
+    // Check if directory is empty; if not, refuse to initialize
+    let is_empty = std::fs::read_dir(config_dir)?.next().transpose()?.is_none();
+
+    if !is_empty {
+        anyhow::bail!("Directory is not empty; refusing to initialize");
+    }
+
     // Collect the required information from the user
-    let name = args.name.clone().unwrap_or(prompt_name()?);
+    let name = args.name.clone().map_or_else(prompt_name, Ok)?;
 
     let platform = match &args.platform {
         Some(p) => p
@@ -56,17 +60,17 @@ pub fn execute(args: &InitArgs, _config_path: &Path) -> anyhow::Result<()> {
         None => prompt_version(&platform)?,
     };
 
-    let eula = args.accept_eula.unwrap_or(prompt_eula()?);
+    let eula = args.accept_eula.map_or_else(prompt_eula, Ok)?;
 
     // Check if the user has accepted the EULA; if not, exit with an error
     if eula {
-        fs::write("eula.txt", "eula=true").context("Failed to write eula.txt")?;
+        fs::write(config_dir.join("eula.txt"), "eula=true").context("Failed to write eula.txt")?;
     } else {
         anyhow::bail!("Agree to EULA to continue")
     }
 
     let checksum = platform
-        .get_core(&version)
+        .get_core(&version, config_dir)
         .context("Failed to download the server core")?;
 
     // Create the config
@@ -78,8 +82,8 @@ pub fn execute(args: &InitArgs, _config_path: &Path) -> anyhow::Result<()> {
     };
 
     // Save the config and properties
-    config.properties.try_save()?;
-    config.try_save()?;
+    config.properties.try_save(config_dir)?;
+    config.try_save(&config_dir)?;
 
     Ok(())
 }
@@ -98,8 +102,7 @@ fn prompt_platform() -> anyhow::Result<Platform> {
         .with_prompt("Select platform")
         .default(0)
         .items(Platform::VARIANTS)
-        .interact()
-        .unwrap();
+        .interact()?;
     let platform: Platform = Platform::VARIANTS[platform_index]
         .parse()
         .expect("platform variant names must parse as Platform");

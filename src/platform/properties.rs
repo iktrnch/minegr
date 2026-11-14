@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -502,8 +504,8 @@ impl Default for Properties {
 }
 
 impl Properties {
-    /// Writes `server.properties` with a warning that minegr manages the file.
-    pub fn try_save(&self) -> anyhow::Result<()> {
+    /// Writes `server.properties` under `config_dir` with a warning that minegr manages it.
+    pub fn try_save(&self, config_dir: &Path) -> anyhow::Result<()> {
         let text = serde_java_properties::to_string(self)
             .context("Failed to serialize server.properties")?;
         let text = format!(
@@ -511,7 +513,8 @@ impl Properties {
              # Use minegr or edit minegr.toml to change server properties.\n\
              {text}"
         );
-        std::fs::write("server.properties", text).context("Failed to write server.properties")?;
+        std::fs::write(config_dir.join("server.properties"), text)
+            .context("Failed to write server.properties")?;
         Ok(())
     }
 }
