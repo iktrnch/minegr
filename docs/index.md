@@ -38,6 +38,8 @@ and tests remain authoritative.
 - [Use one declarative instance file](decisions/0006-use-one-declarative-instance-file.md)
 - [Tail Minecraft latest.log](decisions/0007-tail-minecraft-latest-log.md)
 - [Coordinate exclusive operations in the daemon](decisions/0008-coordinate-exclusive-operations-in-the-daemon.md)
+- [Share core verification and installation](decisions/0009-share-core-verification-and-installation.md)
+- [Support generated cores without upstream checksums](decisions/0010-support-generated-cores-without-upstream-checksums.md)
 
 ## Features
 
