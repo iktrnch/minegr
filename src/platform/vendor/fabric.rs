@@ -52,7 +52,7 @@ impl PlatformProvider for Fabric {
     }
 
     /// Downloads the launcher using the first stable loader and installer versions.
-    fn get_core(version: String) -> anyhow::Result<CoreDownload> {
+    fn get_core(version: &str) -> anyhow::Result<CoreDownload> {
         let client = ApiClient::new().context("Failed to initialize the Fabric server download")?;
         let loaders: Vec<LoaderVersion> = client
             .get(format!(

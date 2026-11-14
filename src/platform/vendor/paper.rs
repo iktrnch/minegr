@@ -81,7 +81,7 @@ impl PlatformProvider for Paper {
     }
 
     /// Downloads the first returned Paper build into a temporary file with its SHA-256.
-    fn get_core(version: String) -> anyhow::Result<CoreDownload> {
+    fn get_core(version: &str) -> anyhow::Result<CoreDownload> {
         let client = ApiClient::new().context("Failed to initialize the Paper server download")?;
         let builds: Vec<Build> = client
             .get(format!(

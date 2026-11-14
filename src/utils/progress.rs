@@ -9,7 +9,7 @@ pub fn progress_bar(
     let (progress, template) = match total_bytes.into() {
         Some(total) => (
             ProgressBar::new(total),
-            "{spinner:.green} {msg:14} [{bar}] {bytes}/{total_bytes} ({bytes_per_sec}, ETA {eta})",
+            "{spinner:.green} {msg:14} {bar} {bytes}/{total_bytes} ({bytes_per_sec}, ETA {eta})",
         ),
         None => (
             ProgressBar::new_spinner(),

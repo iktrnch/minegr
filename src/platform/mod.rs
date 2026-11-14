@@ -1,3 +1,6 @@
+pub mod properties;
+mod vendor;
+
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use sha1::{Digest, Sha1};
@@ -6,10 +9,6 @@ use std::fs::File;
 use std::io::{Read, Seek};
 
 use crate::utils::progress::progress_bar;
-
-pub mod fabric;
-pub mod paper;
-pub mod vanilla;
 
 #[derive(Debug, strum::Display, strum::EnumString, strum::VariantNames, Deserialize, Serialize)]
 #[strum(serialize_all = "lowercase")]
@@ -30,7 +29,7 @@ impl Platform {
     }
 
     /// Downloads a core, verifies any upstream checksum, and installs without replacing files.
-    pub fn get_core(&self, version: String) -> anyhow::Result<()> {
+    pub fn get_core(&self, version: &str) -> anyhow::Result<()> {
         match std::fs::symlink_metadata("server.jar") {
             Ok(_) => anyhow::bail!("server.jar already exists; refusing to overwrite it"),
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
@@ -202,7 +201,7 @@ pub trait PlatformProvider {
     fn select_version() -> anyhow::Result<String>;
     /// Downloads the requested core into a temporary file with any available upstream checksum.
     /// `Platform::get_core` verifies a supplied checksum and installs the file as `server.jar`.
-    fn get_core(version: String) -> anyhow::Result<CoreDownload>;
+    fn get_core(version: &str) -> anyhow::Result<CoreDownload>;
 }
 
 pub struct Paper;
