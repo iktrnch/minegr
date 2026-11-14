@@ -28,12 +28,14 @@ Flags bypass their prompts; invalid values fail. Missing required answers need a
 ## New configuration
 
 1. Resolve the path and gather name, Minecraft version, compatible platform, memory, and properties.
-2. Resolve and pin the exact stable build using [artifact acquisition](../../architecture/artifact-acquisition.md).
+2. Resolve and pin the exact server build using [artifact acquisition](../../architecture/artifact-acquisition.md); Paper resolution uses the first returned build.
 3. Obtain explicit EULA acceptance and default server arguments to `["nogui"]`.
 4. Validate, show a summary, and confirm unless `--yes` is set.
 5. Atomically write owner-only `minegr.toml` and materialize `server.jar`, `server.properties`, and `eula.txt`.
 
 Use Clap and Dialoguer to fill `InitConfig`; `create_config` derives, writes, and returns `Config`. Java must already be available and compatible.
+
+Fabric core resolution selects the first stable compatible loader and the first stable installer, then downloads the generated launcher. The shared installer verifies an upstream checksum when available; Fabric's generated launcher has none.
 
 ## Existing configuration
 

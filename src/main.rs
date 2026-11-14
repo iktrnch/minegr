@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use minegr::client;
+use minegr::cli;
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -33,7 +33,7 @@ fn main() {
 
     match &cli.command {
         Some(Commands::Init) => {
-            client::init::execute();
+            cli::init::execute();
         }
         _ => {
             println!("No command provided. Use --help for more information.");
