@@ -5,14 +5,9 @@ use std::path::PathBuf;
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
-    #[arg(
-        short,
-        long,
-        global = true,
-        value_name = "CONFIG",
-        default_value = "minegr.toml"
-    )]
-    config: PathBuf,
+    /// Directory containing minegr.toml and the managed server files.
+    #[arg(global = true, value_name = "CONFIG_DIR", default_value = ".")]
+    config_dir: PathBuf,
 
     #[command(subcommand)]
     command: Option<Commands>,
@@ -40,7 +35,7 @@ fn main() -> anyhow::Result<()> {
 
     match &cli.command {
         Some(Commands::Init(args)) => {
-            cli::init::execute(args, &cli.config)?;
+            cli::init::execute(args, &cli.config_dir)?;
         }
         _ => {
             println!("No command provided. Use --help for more information.");

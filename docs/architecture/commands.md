@@ -6,7 +6,7 @@ created: 2026-08-27
 
 # Commands
 
-Clap parses commands and the global `--config <path>` option, defaulting to `./minegr.toml`. Resolve relative paths from the working directory without searching parents. Canonicalize existing files; for new configuration, canonicalize the existing parent and append the filename. Require a UTF-8 path.
+Clap defines `[CONFIG_DIR]` once as a global optional positional argument, available before or after every command and defaulting to `.`. Read or write `minegr.toml` inside that directory; configuration filenames are fixed. Resolve relative directories from the working directory without searching parents. Canonicalize the existing directory and require a UTF-8 path.
 
 ## Dispatch
 

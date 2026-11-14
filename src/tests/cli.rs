@@ -1,32 +1,30 @@
 use super::*;
 use clap::CommandFactory;
 
-/// Uses the conventional config filename when no override is supplied.
+/// Uses the current directory when a command has no positional directory.
 #[test]
-fn config_defaults_to_minegr_toml() {
-    let matches = Cli::command()
-        .try_get_matches_from(["minegr", "init"])
-        .unwrap();
-
-    assert_eq!(
-        matches.get_one::<PathBuf>("config"),
-        Some(&PathBuf::from("minegr.toml"))
-    );
-}
-
-/// Accepts global config overrides before and after every command.
-#[test]
-fn config_is_global_for_every_command() {
+fn config_dir_defaults_to_current_directory_for_every_command() {
     for command in [
         "daemon", "backup", "console", "init", "logs", "restart", "start", "status", "stop", "sync",
     ] {
-        for flag in ["--config", "-c"] {
+        let cli = Cli::try_parse_from(["minegr", command]).unwrap();
+        assert_eq!(cli.config_dir, PathBuf::from("."));
+    }
+}
+
+/// Accepts the global positional directory before or after every command.
+#[test]
+fn every_command_accepts_a_config_directory() {
+    for command in [
+        "daemon", "backup", "console", "init", "logs", "restart", "start", "status", "stop", "sync",
+    ] {
+        for directory in ["./server", "/tmp/minegr server", "instances/survival/"] {
             for arguments in [
-                ["minegr", flag, "instances/survival.toml", command],
-                ["minegr", command, flag, "instances/survival.toml"],
+                ["minegr", command, directory],
+                ["minegr", directory, command],
             ] {
                 let cli = Cli::try_parse_from(arguments).unwrap();
-                assert_eq!(cli.config, PathBuf::from("instances/survival.toml"));
+                assert_eq!(cli.config_dir, PathBuf::from(directory));
             }
         }
     }
@@ -39,6 +37,7 @@ fn init_accepts_all_options() {
         .try_get_matches_from([
             "minegr",
             "init",
+            "./server",
             "--name",
             "Survival",
             "--minecraft-version",
@@ -50,6 +49,10 @@ fn init_accepts_all_options() {
         .unwrap();
     let init = matches.subcommand_matches("init").unwrap();
 
+    assert_eq!(
+        init.get_one::<PathBuf>("config_dir"),
+        Some(&PathBuf::from("./server"))
+    );
     assert_eq!(
         init.get_one::<String>("name").map(String::as_str),
         Some("Survival")
@@ -82,6 +85,7 @@ fn init_options_are_optional() {
     let Some(Commands::Init(args)) = cli.command else {
         panic!("expected init command");
     };
+    assert_eq!(cli.config_dir, PathBuf::from("."));
     assert_eq!(args.name, None);
     assert_eq!(args.minecraft_version, None);
     assert_eq!(args.platform, None);
@@ -97,5 +101,41 @@ fn init_accepts_supported_platforms() {
             panic!("expected init command");
         };
         assert_eq!(args.platform.as_deref(), Some(platform));
+    }
+}
+
+/// Accepts the directory before or after flags with explicit values.
+#[test]
+fn init_directory_can_appear_before_or_after_flags() {
+    for arguments in [
+        ["minegr", "init", "./server", "--name", "Survival"],
+        ["minegr", "init", "--name", "Survival", "./server"],
+    ] {
+        let cli = Cli::try_parse_from(arguments).unwrap();
+        let Some(Commands::Init(args)) = cli.command else {
+            panic!("expected init command");
+        };
+        assert_eq!(cli.config_dir, PathBuf::from("./server"));
+        assert_eq!(args.name.as_deref(), Some("Survival"));
+    }
+}
+
+/// Rejects the removed config-file flags before and after every command.
+#[test]
+fn config_flags_are_no_longer_accepted() {
+    for command in [
+        "daemon", "backup", "console", "init", "logs", "restart", "start", "status", "stop", "sync",
+    ] {
+        for flag in ["--config", "-c"] {
+            for arguments in [
+                ["minegr", flag, "minegr.toml", command],
+                ["minegr", command, flag, "minegr.toml"],
+            ] {
+                let error = Cli::try_parse_from(arguments)
+                    .err()
+                    .expect("config-file flags must be rejected");
+                assert_eq!(error.kind(), clap::error::ErrorKind::UnknownArgument);
+            }
+        }
     }
 }
