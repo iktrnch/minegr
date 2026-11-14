@@ -1,26 +1,133 @@
-use crate::config::Config;
-use std::fs;
+use crate::config::Minegr;
+use crate::config::{Config, Java, Minecraft};
+use crate::platform::Platform;
+use crate::platform::properties::Properties;
+use anyhow::Context;
+use dialoguer::{Confirm, FuzzySelect, Input, Select, theme::ColorfulTheme};
+use std::{fs, path::Path};
+use strum::VariantNames;
+
+/// Optional command-line inputs for server initialization.
+#[derive(Debug, clap::Args)]
+pub struct InitArgs {
+    /// Display name; defaults to the root directory name when applied.
+    #[arg(long, value_name = "NAME")]
+    pub name: Option<String>,
+
+    /// Exact Minecraft version.
+    #[arg(long, value_name = "VERSION")]
+    pub minecraft_version: Option<String>,
+
+    /// Minecraft server platform.
+    #[arg(long, value_name = "PLATFORM", value_parser = ["vanilla", "paper", "fabric"])]
+    pub platform: Option<String>,
+
+    /// Explicitly accept the Minecraft EULA.
+    #[arg(long, num_args = 0..=1, default_missing_value = "true")]
+    pub accept_eula: Option<bool>,
+}
 
 /// Runs the interactive initialization prompts.
-pub fn execute() -> anyhow::Result<()> {
-    // Create the config
-    let config = Config::init();
+///
+/// Arguments and the config path are forwarded for future use; initialization
+/// currently uses the existing interactive prompts and save locations.
+pub fn execute(args: &InitArgs, _config_path: &Path) -> anyhow::Result<()> {
+    // Collect the required information from the user
+    let name = args.name.clone().unwrap_or(prompt_name()?);
 
-    // Agree to the EULA
-    if (&config).minecraft.eula {
-        fs::write("eula.txt", "eula=true").expect("Failed to write eula.txt");
+    let platform = match &args.platform {
+        Some(p) => p
+            .parse::<Platform>()
+            .context("Invalid platform specified")?,
+        None => prompt_platform()?,
+    };
+
+    let version = match &args.minecraft_version {
+        Some(v) => {
+            // Validate the version by attempting to select it
+            let versions = platform
+                .select_version()
+                .context("Failed to fetch Minecraft versions")?;
+            if !versions.contains(v) {
+                anyhow::bail!("Invalid Minecraft version specified for the selected platform");
+            }
+            v.clone()
+        }
+        None => prompt_version(&platform)?,
+    };
+
+    let eula = args.accept_eula.unwrap_or(prompt_eula()?);
+
+    // Check if the user has accepted the EULA; if not, exit with an error
+    if eula {
+        fs::write("eula.txt", "eula=true").context("Failed to write eula.txt")?;
     } else {
         anyhow::bail!("Agree to EULA to continue")
     }
 
-    // Get the server core as server.jar
-    config
-        .minecraft
-        .platform
-        .get_core(&config.minecraft.version)?;
+    let checksum = platform
+        .get_core(&version)
+        .context("Failed to download the server core")?;
 
+    // Create the config
+    let config = Config {
+        minegr: Minegr::new(name),
+        minecraft: Minecraft::new(platform, version, checksum, eula),
+        properties: Properties::default(),
+        java: Java::default(),
+    };
+
+    // Save the config and properties
     config.properties.try_save()?;
-
     config.try_save()?;
+
     Ok(())
+}
+
+fn prompt_name() -> anyhow::Result<String> {
+    let name: String = Input::with_theme(&ColorfulTheme::default())
+        .with_prompt("Name your instance: ")
+        .interact_text()
+        .context("Failed to read instance name")?;
+    Ok(name)
+}
+
+/// Prompts the user to select a platform from the available variants.
+fn prompt_platform() -> anyhow::Result<Platform> {
+    let platform_index = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select platform")
+        .default(0)
+        .items(Platform::VARIANTS)
+        .interact()
+        .unwrap();
+    let platform: Platform = Platform::VARIANTS[platform_index]
+        .parse()
+        .expect("platform variant names must parse as Platform");
+
+    Ok(platform)
+}
+
+/// Prompts the user to select a version from the available versions for the given platform.
+fn prompt_version(platform: &Platform) -> anyhow::Result<String> {
+    let versions = platform
+        .select_version()
+        .context("Failed to fetch Minecraft versions")?;
+
+    let version_index = FuzzySelect::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select Vanilla Minecraft version (type to search)")
+        .default(0)
+        .items((*versions).clone())
+        .max_length(5)
+        .interact()
+        .context("Failed to select a Vanilla Minecraft version")?;
+
+    Ok(versions[version_index].clone())
+}
+
+fn prompt_eula() -> anyhow::Result<bool> {
+    let eula = Confirm::with_theme(&ColorfulTheme::default())
+        .with_prompt("Do you accept the EULA?")
+        .interact()
+        .context("Failed to read EULA acceptance")?;
+    Ok(eula)
 }

@@ -18,9 +18,10 @@ pub enum Platform {
     Vanilla,
 }
 
+/// implements [PlatformProvider] for each platform variant.
 impl Platform {
     /// Selects a version using this platform's provider.
-    pub fn select_version(&self) -> anyhow::Result<String> {
+    pub fn select_version(&self) -> anyhow::Result<Box<Vec<String>>> {
         match self {
             Platform::Paper => Paper::select_version(),
             Platform::Fabric => Fabric::select_version(),
@@ -29,7 +30,8 @@ impl Platform {
     }
 
     /// Downloads a core, verifies any upstream checksum, and installs without replacing files.
-    pub fn get_core(&self, version: &str) -> anyhow::Result<()> {
+    /// Returns the checksum if the provider supplies one.
+    pub fn get_core(&self, version: &str) -> anyhow::Result<String> {
         match std::fs::symlink_metadata("server.jar") {
             Ok(_) => anyhow::bail!("server.jar already exists; refusing to overwrite it"),
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
@@ -85,7 +87,12 @@ impl Platform {
             .context("server.jar was installed, but synchronizing its directory failed")?;
         copy_progress.finish_with_message("Copied");
 
-        Ok(())
+        let checksum_string = match core.checksum {
+            Some(CoreChecksum::Sha1(checksum)) => checksum,
+            Some(CoreChecksum::Sha256(checksum)) => checksum,
+            None => String::new(),
+        };
+        Ok(checksum_string)
     }
 }
 
@@ -198,7 +205,7 @@ fn hash_core<D: Digest>(
 
 pub trait PlatformProvider {
     /// Fetches platform versions and selects one with a five-row fuzzy picker.
-    fn select_version() -> anyhow::Result<String>;
+    fn select_version() -> anyhow::Result<Box<Vec<String>>>;
     /// Downloads the requested core into a temporary file with any available upstream checksum.
     /// `Platform::get_core` verifies a supplied checksum and installs the file as `server.jar`.
     fn get_core(version: &str) -> anyhow::Result<CoreDownload>;

@@ -3,7 +3,6 @@ use crate::{
     utils::http::ApiClient,
 };
 use anyhow::Context;
-use dialoguer::{FuzzySelect, theme::ColorfulTheme};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -51,7 +50,7 @@ impl Manifest {
 }
 
 impl PlatformProvider for Vanilla {
-    fn select_version() -> anyhow::Result<String> {
+    fn select_version() -> anyhow::Result<Box<Vec<String>>> {
         let client = reqwest::blocking::Client::builder()
             .timeout(std::time::Duration::from_secs(30))
             .build()
@@ -71,15 +70,7 @@ impl PlatformProvider for Vanilla {
             "Mojang's manifest contains no releases"
         );
 
-        let selected = FuzzySelect::with_theme(&ColorfulTheme::default())
-            .with_prompt("Select Vanilla Minecraft version (type to search)")
-            .default(0)
-            .items(&versions)
-            .max_length(5)
-            .interact()
-            .context("Failed to select a Vanilla Minecraft version")?;
-
-        Ok(versions[selected].clone())
+        Ok(Box::new(versions))
     }
 
     /// Downloads the exact Vanilla version into a temporary file with its SHA-1 checksum.

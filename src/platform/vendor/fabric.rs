@@ -1,5 +1,4 @@
 use anyhow::Context;
-use dialoguer::{FuzzySelect, theme::ColorfulTheme};
 use serde::Deserialize;
 
 use crate::platform::{CoreDownload, Fabric, PlatformProvider};
@@ -17,7 +16,7 @@ struct LoaderVersion {
 }
 
 impl PlatformProvider for Fabric {
-    fn select_version() -> anyhow::Result<String> {
+    fn select_version() -> anyhow::Result<Box<Vec<String>>> {
         let game_versions: Vec<Version> = ApiClient::new()
             .context("Failed to initialize Fabric version selection")?
             .get("https://meta.fabricmc.net/v2/versions/game")
@@ -30,25 +29,18 @@ impl PlatformProvider for Fabric {
 
         // Rayon could parallelize this filter/map, but sequential iterators suffice here.
         // Preserve Fabric's newest-first order and keep all stable versions searchable.
-        let mut versions: Vec<String> = game_versions
+        let versions: Vec<String> = game_versions
             .into_iter()
             .filter(|version| version.stable)
             .map(|version| version.version)
             .collect();
+
         anyhow::ensure!(
             !versions.is_empty(),
             "Fabric's game metadata contains no stable versions"
         );
 
-        let selected = FuzzySelect::with_theme(&ColorfulTheme::default())
-            .with_prompt("Select Fabric Minecraft version (type to search)")
-            .default(0)
-            .items(&versions)
-            .max_length(5)
-            .interact()
-            .context("Failed to select a Fabric Minecraft version")?;
-
-        Ok(versions.swap_remove(selected))
+        Ok(Box::new(versions))
     }
 
     /// Downloads the launcher using the first stable loader and installer versions.
