@@ -502,9 +502,15 @@ impl Default for Properties {
 }
 
 impl Properties {
-    /// Returns a new `Properties` with the Minegr MOTD and zero spawn protection.
+    /// Writes `server.properties` with a warning that minegr manages the file.
     pub fn try_save(&self) -> anyhow::Result<()> {
-        let text = toml::to_string_pretty(&self).context("Failed to parse config into a file")?;
+        let text = serde_java_properties::to_string(self)
+            .context("Failed to serialize server.properties")?;
+        let text = format!(
+            "# IMPORTANT: Managed by minegr; changes are overwritten on the next server start.\n\
+             # Use minegr or edit minegr.toml to change server properties.\n\
+             {text}"
+        );
         std::fs::write("server.properties", text).context("Failed to write server.properties")?;
         Ok(())
     }

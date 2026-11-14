@@ -1,7 +1,5 @@
 use anyhow::Context;
-use dialoguer::{Confirm, Input, Select, theme::ColorfulTheme};
 use serde::{Deserialize, Serialize};
-use strum::VariantNames;
 
 pub use crate::platform::Platform;
 use crate::platform::properties::Properties;
@@ -21,12 +19,34 @@ pub struct Minegr {
     pub name: String,
 }
 
+impl Minegr {
+    pub fn new(name: String) -> Self {
+        Minegr {
+            application_type: ApplicationType::Server,
+            version: 1,
+            uuid: uuid::Uuid::new_v4().to_string(),
+            name,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Minecraft {
     pub platform: Platform,
     pub version: String,
     pub checksum: String,
     pub eula: bool,
+}
+
+impl Minecraft {
+    pub fn new(platform: Platform, version: String, checksum: String, eula: bool) -> Self {
+        Minecraft {
+            platform,
+            version,
+            checksum,
+            eula,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -55,21 +75,9 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn init() -> Self {
-        let minegr = minegr();
-        let minecraft = minecraft();
-
-        Config {
-            minegr,
-            minecraft,
-            properties: Properties::default(),
-            java: Java::default(),
-        }
-    }
-
     pub fn try_load() -> anyhow::Result<Self> {
         let config_str =
-            std::fs::read_to_string("config.toml").context("Failed to read config file")?;
+            std::fs::read_to_string("minegr.toml").context("Failed to read config file")?;
         toml::from_str(&config_str).context("Failed to parse config file")
     }
 
@@ -77,48 +85,5 @@ impl Config {
         let text = toml::to_string_pretty(&self).context("Failed to parse config into a file")?;
         std::fs::write("config.toml", text).context("Failed to write config file")?;
         Ok(())
-    }
-}
-
-fn minegr() -> Minegr {
-    let name: String = Input::with_theme(&ColorfulTheme::default())
-        .with_prompt("Name your instance: ")
-        .interact_text()
-        .unwrap();
-
-    Minegr {
-        application_type: ApplicationType::Server,
-        version: 1,
-        uuid: uuid::Uuid::new_v4().to_string(),
-        name,
-    }
-}
-
-/// Collects the Minecraft platform and EULA acceptance.
-fn minecraft() -> Minecraft {
-    let platform_index = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select platform")
-        .default(0)
-        .items(Platform::VARIANTS)
-        .interact()
-        .unwrap();
-    let platform: Platform = Platform::VARIANTS[platform_index]
-        .parse()
-        .expect("platform variant names must parse as Platform");
-
-    let version = platform
-        .select_version()
-        .expect("Failed to select a Minecraft version");
-    let checksum = String::new(); // TODO: Implement checksum calculation logic
-    let eula = Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("Do you accept the EULA?")
-        .interact()
-        .unwrap();
-
-    Minecraft {
-        platform,
-        version,
-        checksum,
-        eula,
     }
 }

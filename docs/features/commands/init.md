@@ -10,16 +10,16 @@ created: 2026-08-24
 
 ## Options
 
-| Flag | Meaning |
-| --- | --- |
-| `--name <name>` | Display name; defaults to the root directory name |
-| `--minecraft-version <version>` | Exact Minecraft version |
-| `--platform <platform>` | `vanilla`, `paper`, or `fabric` |
-| `--memory <size>` | Matching `-Xms` and `-Xmx`; default `2G` |
-| `--port <port>` | `server-port`; default `25565` |
-| `--accept-eula` | Explicit Minecraft EULA acceptance |
-| `--yes` | Skip final confirmation, never EULA acceptance |
-| `--uuid` | Replace only an existing configuration's UUID |
+| Flag                            | Meaning                                           |
+| ------------------------------- | ------------------------------------------------- |
+| `--name <name>`                 | Display name; defaults to the root directory name |
+| `--minecraft-version <version>` | Exact Minecraft version                           |
+| `--platform <platform>`         | `vanilla`, `paper`, or `fabric`                   |
+| `--memory <size>`               | Matching `-Xms` and `-Xmx`; default `2G`          |
+| `--port <port>`                 | `server-port`; default `25565`                    |
+| `--accept-eula`                 | Explicit Minecraft EULA acceptance                |
+| `--yes`                         | Skip final confirmation, never EULA acceptance    |
+| `--uuid`                        | Replace only an existing configuration's UUID     |
 
 Flags bypass their prompts; invalid values fail. Missing required answers need an interactive terminal or explicit flags.
 

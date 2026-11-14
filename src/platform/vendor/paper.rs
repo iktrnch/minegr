@@ -1,5 +1,4 @@
 use anyhow::Context;
-use dialoguer::{FuzzySelect, theme::ColorfulTheme};
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -35,7 +34,7 @@ struct Checksums {
 }
 
 impl PlatformProvider for Paper {
-    fn select_version() -> anyhow::Result<String> {
+    fn select_version() -> anyhow::Result<Box<Vec<String>>> {
         let project: Project = ApiClient::new()
             .context("Failed to initialize Paper version selection")?
             .get("https://fill.papermc.io/v3/projects/paper")
@@ -63,21 +62,14 @@ impl PlatformProvider for Paper {
             .collect();
         releases.sort_unstable_by(|(left, _), (right, _)| right.cmp(left));
         releases.dedup_by(|left, right| left.1 == right.1);
-        let mut versions: Vec<String> = releases.into_iter().map(|(_, version)| version).collect();
+
+        let versions: Vec<String> = releases.into_iter().map(|(_, version)| version).collect();
         anyhow::ensure!(
             !versions.is_empty(),
             "Paper's project metadata contains no releases"
         );
 
-        let selected = FuzzySelect::with_theme(&ColorfulTheme::default())
-            .with_prompt("Select Paper Minecraft version (type to search)")
-            .default(0)
-            .items(&versions)
-            .max_length(5)
-            .interact()
-            .context("Failed to select a Paper Minecraft version")?;
-
-        Ok(versions.swap_remove(selected))
+        Ok(Box::new(versions))
     }
 
     /// Downloads the first returned Paper build into a temporary file with its SHA-256.
