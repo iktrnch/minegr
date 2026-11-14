@@ -43,6 +43,7 @@ and tests remain authoritative.
 
 ## Features
 
+- [add-command](features/commands/add.md)
 - [backup-command](features/commands/backup.md)
 - [console-command](features/commands/console.md)
 - [init-command](features/commands/init.md)

@@ -18,15 +18,8 @@ enum Commands {
     /// Daemon mode
     Daemon,
     /// Client connection
-    Backup,
-    Console,
     Init(cli::init::InitArgs),
-    Logs,
-    Restart,
-    Start,
-    Status,
-    Stop,
-    Sync,
+    Add(cli::add::AddArgs),
 }
 
 /// Parses command-line arguments and dispatches the selected command.
@@ -36,6 +29,9 @@ fn main() -> anyhow::Result<()> {
     match &cli.command {
         Some(Commands::Init(args)) => {
             cli::init::execute(args, &cli.config_dir)?;
+        }
+        Some(Commands::Add(args)) => {
+            cli::add::execute(args, &cli.config_dir)?;
         }
         _ => {
             println!("No command provided. Use --help for more information.");

@@ -1,8 +1,9 @@
-use std::path::Path;
+use std::{io::Write, path::Path};
 
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
 
+use crate::modrinth::repository::ReleaseChannel;
 pub use crate::platform::Platform;
 use crate::platform::properties::Properties;
 
@@ -11,6 +12,18 @@ use crate::platform::properties::Properties;
 pub enum ApplicationType {
     Server,
     Instance,
+}
+
+/// A pinned addon file and the channel policy used for future updates.
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Addon {
+    /// Installed filename supplied by Modrinth.
+    pub name: String,
+    pub version_id: String,
+    /// Algorithm-qualified checksum, such as sha512:<hex>.
+    pub hash: String,
+    /// Most permissive allowed channel, which may differ from the installed release's channel.
+    pub version_type: ReleaseChannel,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -74,17 +87,37 @@ pub struct Config {
     pub minecraft: Minecraft,
     pub properties: Properties,
     pub java: Java,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub addons: Vec<Addon>,
 }
 
 impl Config {
-    pub fn try_load(path: &Path) -> anyhow::Result<Self> {
-        let config_str = std::fs::read_to_string(path).context("Failed to read config file")?;
+    pub fn try_load(config_dir: &Path) -> anyhow::Result<Self> {
+        let config_str = std::fs::read_to_string(config_dir.join("minegr.toml"))
+            .context("Failed to read config file")?;
         toml::from_str(&config_str).context("Failed to parse config file")
     }
 
+    /// Atomically saves minegr.toml inside the selected directory with owner-only permissions.
     pub fn try_save(&self, path: &Path) -> anyhow::Result<()> {
-        let text = toml::to_string_pretty(&self).context("Failed to parse config into a file")?;
-        std::fs::write(path.join("minegr.toml"), text).context("Failed to write config file")?;
+        let text = toml::to_string_pretty(self).context("Failed to serialize the configuration")?;
+        let mut staged = tempfile::NamedTempFile::new_in(path)
+            .context("Failed to create a temporary configuration file")?;
+        staged
+            .write_all(text.as_bytes())
+            .context("Failed to write the temporary configuration")?;
+        staged
+            .as_file()
+            .sync_all()
+            .context("Failed to synchronize the temporary configuration")?;
+        staged
+            .persist(path.join("minegr.toml"))
+            .map_err(|error| error.error)
+            .context("Failed to publish minegr.toml")?;
+        std::fs::File::open(path)
+            .context("Failed to open the configuration directory for synchronization")?
+            .sync_all()
+            .context("minegr.toml was saved, but synchronizing its directory failed")?;
         Ok(())
     }
 }

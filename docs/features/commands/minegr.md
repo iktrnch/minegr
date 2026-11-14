@@ -20,6 +20,7 @@ Resolve relative directories from the working directory without searching parent
 | Command | Purpose |
 | --- | --- |
 | [init](init.md) | Create configuration or materialize missing files |
+| [add](add.md) | Install a compatible Modrinth addon and pin its file |
 | [sync](sync.md) | Capture stopped-server properties into configuration |
 | [start](start.md) | Start Java through its daemon |
 | [stop](stop.md) | Stop Java and the daemon |

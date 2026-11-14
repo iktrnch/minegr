@@ -97,6 +97,17 @@ impl Platform {
         };
         Ok(checksum_string)
     }
+
+    pub fn get_addons_dir(&self, config_dir: &Path) -> anyhow::Result<std::path::PathBuf> {
+        let addons_dir = match self {
+            Platform::Paper => config_dir.join("plugins"),
+            Platform::Fabric => config_dir.join("mods"),
+            Platform::Vanilla => {
+                anyhow::bail!("Vanilla does not support addons!\nTry Paper or Fabric.")
+            }
+        };
+        Ok(addons_dir)
+    }
 }
 
 /// A downloaded server JAR and the upstream metadata needed to verify it.

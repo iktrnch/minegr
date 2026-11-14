@@ -29,6 +29,10 @@ pub struct InitArgs {
 
 /// Initializes the selected directory, writing minegr.toml and managed server files there.
 pub fn execute(args: &InitArgs, config_dir: &Path) -> anyhow::Result<()> {
+    // Check if the directory exists; if not, create it
+    if !config_dir.exists() {
+        fs::create_dir_all(config_dir).context("Failed to create the configuration directory")?;
+    }
     // Check if directory is empty; if not, refuse to initialize
     let is_empty = std::fs::read_dir(config_dir)?.next().transpose()?.is_none();
 
@@ -79,6 +83,7 @@ pub fn execute(args: &InitArgs, config_dir: &Path) -> anyhow::Result<()> {
         minecraft: Minecraft::new(platform, version, checksum, eula),
         properties: Properties::default(),
         java: Java::default(),
+        addons: Vec::new(),
     };
 
     // Save the config and properties
