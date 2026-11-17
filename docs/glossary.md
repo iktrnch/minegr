@@ -13,7 +13,7 @@ created: 2026-08-31
 | Message | A protocol request, response, lifecycle update, or subscription item. |
 | Port | A logical Message route such as `Logs`, `Status`, or `Console`. |
 | Console input | One complete line accepted into the daemon's shared FIFO. |
-| Minegr version | Embedded package version used for exact handshake compatibility; no separate protocol version. |
+| Moxum version | Embedded package version used for exact handshake compatibility; no separate protocol version. |
 | Instance | One configuration and server root, including managed files, mutable state, and an optional daemon. |
 | Managed file | `server.jar`, `server.properties`, or `eula.txt`; `init` creates missing files without overwriting differing ones. |
 | Mutable state | Minecraft data excluded from configuration, such as worlds, player data, access lists, and logs. |
@@ -28,4 +28,3 @@ Copying configuration recreates the initial setup, not mutable state.
 - [Configuration](architecture/configuration.md)
 - [Filesystem layout](architecture/filesystem-layout.md)
 - [Use one or two IPC tunnels](decisions/0005-use-one-or-two-ipc-tunnels.md)
-

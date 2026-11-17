@@ -6,7 +6,7 @@ created: 2026-08-24
 
 # Restart command
 
-`minegr restart` replaces Java while retaining its daemon, socket, console clients, and log followers.
+`moxum restart` replaces Java while retaining its daemon, socket, console clients, and log followers.
 
 1. Reload and validate configuration before touching the running server. UUID and canonical path must stay unchanged.
 2. Wait for backup and drain earlier Console inputs.
@@ -32,4 +32,3 @@ No daemon reports `Server is not running`. Invalid configuration leaves Java unt
 - [Stop command](stop.md)
 - [Operation coordination](../../architecture/operation-coordination.md)
 - [Logging](../../architecture/logging.md)
-

@@ -2,7 +2,7 @@
 
 ## Project Structure
 
-`minegr` is an early-stage Rust 2024 CLI/TUI for managing Minecraft servers on Linux.
+`moxum` is an early-stage Rust 2024 CLI/TUI for managing Minecraft servers on Linux.
 
 - Keep `src/main.rs` focused on startup and command dispatch.
 - Place reusable modules under `src/`.

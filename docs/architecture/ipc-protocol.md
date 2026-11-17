@@ -6,7 +6,7 @@ created: 2026-08-24
 
 # IPC protocol
 
-The daemon listens at `$XDG_RUNTIME_DIR/minegr/<uuid>.sock`. Each daemon-backed command opens one full-duplex `UnixStream`. Most sessions use one logical port; the console session carries `Logs`, `Status`, and `Console` together.
+The daemon listens at `$XDG_RUNTIME_DIR/moxum/<uuid>.sock`. Each daemon-backed command opens one full-duplex `UnixStream`. Most sessions use one logical port; the console session carries `Logs`, `Status`, and `Console` together.
 
 ## Transport
 
@@ -49,7 +49,7 @@ Requests and responses use distinct types. Responses may carry updates followed 
 
 ## Sessions
 
-Every connection starts with the Minegr package version, server UUID, and canonical UTF-8 configuration path. Require an exact version and identity match, including for `stop`. A version rejection reports both versions. There is no separate protocol version or cross-version compatibility guarantee.
+Every connection starts with the Moxum package version, server UUID, and canonical UTF-8 configuration path. Require an exact version and identity match, including for `stop`. A version rejection reports both versions. There is no separate protocol version or cross-version compatibility guarantee.
 
 The first post-handshake message selects the session. Permit only its port, or the console's three ports. Keep at most one unanswered request per port; log and state subscriptions may coexist with a pending Console input. Route through the connection and port without transport request IDs.
 
@@ -89,4 +89,3 @@ All clients share one unbounded Console input FIFO. [Operation coordination](ope
 - [Sync vs async](../decisions/0002-sync-vs-async.md)
 - [Logging](logging.md)
 - [Operation coordination](operation-coordination.md)
-

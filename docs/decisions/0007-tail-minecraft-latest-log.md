@@ -10,7 +10,7 @@ superseded_by: []
 
 ## Context
 
-`logs` and `console` require recent Minecraft output and live updates. Minecraft already persists that output in `logs/latest.log`, so a second Minegr-owned persistent copy or daemon-session buffer would duplicate data and define competing retention semantics.
+`logs` and `console` require recent Minecraft output and live updates. Minecraft already persists that output in `logs/latest.log`, so a second Moxum-owned persistent copy or daemon-session buffer would duplicate data and define competing retention semantics.
 
 ## Options considered
 
@@ -31,7 +31,7 @@ The daemon reads history and follows appended lines from Minecraft's current log
 
 ### Keep daemon-session history
 
-Capture Java output in a Minegr-owned buffer spanning Java restarts.
+Capture Java output in a Moxum-owned buffer spanning Java restarts.
 
 **Advantages**
 
@@ -45,22 +45,22 @@ Capture Java output in a Minegr-owned buffer spanning Java restarts.
 
 ## Decision
 
-The daemon tails `<server-root>/logs/latest.log` and serves it through the `Logs` protocol port. Minegr keeps no Minecraft-output history buffer and writes no duplicate Minecraft log file.
+The daemon tails `<server-root>/logs/latest.log` and serves it through the `Logs` protocol port. Moxum keeps no Minecraft-output history buffer and writes no duplicate Minecraft log file.
 
 ## Rationale
 
-Minecraft already owns persistent log production. Reusing it keeps Minegr's responsibility limited to controlled access and live streaming.
+Minecraft already owns persistent log production. Reusing it keeps Moxum's responsibility limited to controlled access and live streaming.
 
 ## Consequences
 
 ### Positive
 
 - One persistent source of Minecraft output exists.
-- Minegr log clients and external tools observe the same file.
+- Moxum log clients and external tools observe the same file.
 
 ### Negative
 
-- New history requests after restart cannot see the previous `latest.log` through Minegr.
+- New history requests after restart cannot see the previous `latest.log` through Moxum.
 - Connected followers need explicit file-replacement handling.
 
 ## Related
@@ -68,4 +68,3 @@ Minecraft already owns persistent log production. Reusing it keeps Minegr's resp
 - [Logging](../architecture/logging.md)
 - [Logs command](../features/commands/logs.md)
 - [Console command](../features/commands/console.md)
-

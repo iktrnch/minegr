@@ -14,16 +14,16 @@ pub enum ApplicationType {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct Minegr {
+pub struct Moxum {
     pub application_type: ApplicationType,
     pub version: u8,
     pub uuid: String,
     pub name: String,
 }
 
-impl Minegr {
+impl Moxum {
     pub fn new(name: String) -> Self {
-        Minegr {
+        Moxum {
             application_type: ApplicationType::Server,
             version: 1,
             uuid: uuid::Uuid::new_v4().to_string(),
@@ -70,7 +70,7 @@ impl Default for Java {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
-    pub minegr: Minegr,
+    pub moxum: Moxum,
     pub minecraft: Minecraft,
     pub properties: Properties,
     pub java: Java,
@@ -84,7 +84,7 @@ impl Config {
 
     pub fn try_save(&self, path: &Path) -> anyhow::Result<()> {
         let text = toml::to_string_pretty(&self).context("Failed to parse config into a file")?;
-        std::fs::write(path.join("minegr.toml"), text).context("Failed to write config file")?;
+        std::fs::write(path.join("moxum.toml"), text).context("Failed to write config file")?;
         Ok(())
     }
 }

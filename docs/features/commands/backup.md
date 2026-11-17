@@ -6,13 +6,13 @@ created: 2026-08-24
 
 # Backup command
 
-`minegr backup` creates a ZIP of world folders for a stopped or daemon-managed server.
+`moxum backup` creates a ZIP of world folders for a stopped or daemon-managed server.
 
 Print `Creating backup…`, then `Backup created: <path>`. Use local time in `backups/backup-DD-MM-YYYY-HH-MM-SS±HHMM.zip`. Never overwrite or automatically delete backups.
 
 ## Workflow
 
-1. Acquire the operating-system lock on `.minegr/locks/backup.lock`.
+1. Acquire the operating-system lock on `.moxum/locks/backup.lock`.
 2. Read `level-name` from `server.properties`, defaulting to `world`. Include that folder and matching `_nether` and `_the_end` folders.
 3. Validate paths and require free space for the input size plus 10%.
 4. For a live server, acquire the daemon's save barrier; otherwise reject active world `session.lock` files.
@@ -33,4 +33,3 @@ The CLI validates and archives; the daemon owns live-save coordination. Drain ea
 - [Daemon](../daemon.md)
 - [Operation coordination](../../architecture/operation-coordination.md)
 - [Filesystem layout](../../architecture/filesystem-layout.md)
-

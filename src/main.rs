@@ -1,11 +1,11 @@
 use clap::{Parser, Subcommand};
-use minegr::cli;
+use moxum::cli;
 use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
-    /// Directory containing minegr.toml and the managed server files.
+    /// Directory containing moxum.toml and the managed server files.
     #[arg(global = true, value_name = "CONFIG_DIR", default_value = ".")]
     config_dir: PathBuf,
 

@@ -6,7 +6,7 @@ created: 2026-08-27
 
 # Commands
 
-Clap defines `[CONFIG_DIR]` once as a global optional positional argument, available before or after every command and defaulting to `.`. Read or write `minegr.toml` inside that directory; configuration filenames are fixed. Resolve relative directories from the working directory without searching parents. Canonicalize the existing directory and require a UTF-8 path.
+Clap defines `[CONFIG_DIR]` once as a global optional positional argument, available before or after every command and defaulting to `.`. Read or write `moxum.toml` inside that directory; configuration filenames are fixed. Resolve relative directories from the working directory without searching parents. Canonicalize the existing directory and require a UTF-8 path.
 
 ## Dispatch
 
@@ -14,7 +14,7 @@ Keep startup and dispatch in `main.rs`, command handlers in focused modules, and
 
 Normal handlers receive the canonical path and a deserialized `Config` using TOML and Serde. New-instance `init` fills an `InitConfig` from flags or prompts; `create_config` writes and returns the resulting `Config`. Existing-file `init` loads it to materialize missing files.
 
-Dispatch is synchronous. Daemon and socket operations use Tokio, with one runtime per invocation. Handlers return structured errors; dispatch renders the final error once and selects the [exit code](../features/commands/minegr.md#exit-codes).
+Dispatch is synchronous. Daemon and socket operations use Tokio, with one runtime per invocation. Handlers return structured errors; dispatch renders the final error once and selects the [exit code](../features/commands/moxum.md#exit-codes).
 
 ## Terminal output
 
@@ -28,10 +28,9 @@ Configuration writes and validation follow the shared contracts below.
 
 ## Related
 - [Configuration](configuration.md)
-- [Minegr command](../features/commands/minegr.md)
+- [Moxum command](../features/commands/moxum.md)
 - [Init command](../features/commands/init.md)
 - [Sync command](../features/commands/sync.md)
 - [Validation](validation.md)
 - [Use Dialoguer for interactive prompts](../decisions/0003-use-dialoguer-for-interactive-prompts.md)
 - [Sync vs async](../decisions/0002-sync-vs-async.md)
-

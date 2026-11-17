@@ -10,7 +10,7 @@ superseded_by: ["0003"]
 
 ## Context
 
-`minegr init` requires interactive prompts for configuration values not supplied through CLI flags. These prompts include text input, platform and version selection, typed numeric input, validation, default values, help messages, and confirmations.
+`moxum init` requires interactive prompts for configuration values not supplied through CLI flags. These prompts include text input, platform and version selection, typed numeric input, validation, default values, help messages, and confirmations.
 
 The prompt library must work alongside `clap`.
 
@@ -39,13 +39,13 @@ A Rust library for building interactive terminal prompts. It provides text, type
 **Disadvantages**
 - Adds a separate dependency alongside `clap`.
 - Has its own rendering and styling system that must be configured consistently.
-- Offers features that `minegr` may not initially require.
+- Offers features that `moxum` may not initially require.
 ### Dialoguer
 
 A Rust library providing common interactive terminal dialogs, including text input, selection, multiselection, confirmation, password input, fuzzy selection, and editor integration.
 
 **Advantages**
-- Supports all basic prompt types required by `minegr init`.
+- Supports all basic prompt types required by `moxum init`.
 - Provides reusable themes for consistent prompt styling.
 - Integrates naturally with the `console` and `indicatif` ecosystem.
 - Supports optional fuzzy selection, completion, and input history.
@@ -62,7 +62,7 @@ Use `inquire` for interactive terminal prompts.
 Continue using `clap` for command and flag parsing. Values supplied through `clap` flags will bypass their corresponding `inquire` prompts.
 ## Rationale
 
-Both libraries provide the basic prompt types required by `minegr` - `inquire` was chosen because its API, documentation, validation model, and default presentation are better suited to the planned `minegr init` setup wizard.
+Both libraries provide the basic prompt types required by `moxum` - `inquire` was chosen because its API, documentation, validation model, and default presentation are better suited to the planned `moxum init` setup wizard.
 
 Its support for typed input, inline validation, help messages, defaults, and searchable selections reduces the amount of custom interaction code required. Its interaction style is also familiar from [Ferium](https://github.com/gorilla-devs/ferium) and matches the desired user experience.
 

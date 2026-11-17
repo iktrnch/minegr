@@ -7,7 +7,7 @@ fn config_dir_defaults_to_current_directory_for_every_command() {
     for command in [
         "daemon", "backup", "console", "init", "logs", "restart", "start", "status", "stop", "sync",
     ] {
-        let cli = Cli::try_parse_from(["minegr", command]).unwrap();
+        let cli = Cli::try_parse_from(["moxum", command]).unwrap();
         assert_eq!(cli.config_dir, PathBuf::from("."));
     }
 }
@@ -18,11 +18,8 @@ fn every_command_accepts_a_config_directory() {
     for command in [
         "daemon", "backup", "console", "init", "logs", "restart", "start", "status", "stop", "sync",
     ] {
-        for directory in ["./server", "/tmp/minegr server", "instances/survival/"] {
-            for arguments in [
-                ["minegr", command, directory],
-                ["minegr", directory, command],
-            ] {
+        for directory in ["./server", "/tmp/moxum server", "instances/survival/"] {
+            for arguments in [["moxum", command, directory], ["moxum", directory, command]] {
                 let cli = Cli::try_parse_from(arguments).unwrap();
                 assert_eq!(cli.config_dir, PathBuf::from(directory));
             }
@@ -35,7 +32,7 @@ fn every_command_accepts_a_config_directory() {
 fn init_accepts_all_options() {
     let matches = Cli::command()
         .try_get_matches_from([
-            "minegr",
+            "moxum",
             "init",
             "./server",
             "--name",
@@ -72,7 +69,7 @@ fn init_accepts_all_options() {
 /// Rejects platforms outside the supported set.
 #[test]
 fn init_rejects_unknown_platforms() {
-    let error = Cli::try_parse_from(["minegr", "init", "--platform", "forge"])
+    let error = Cli::try_parse_from(["moxum", "init", "--platform", "forge"])
         .err()
         .expect("unsupported platforms must be rejected");
     assert_eq!(error.kind(), clap::error::ErrorKind::InvalidValue);
@@ -81,7 +78,7 @@ fn init_rejects_unknown_platforms() {
 /// Leaves every init option unset when no flags are supplied.
 #[test]
 fn init_options_are_optional() {
-    let cli = Cli::try_parse_from(["minegr", "init"]).unwrap();
+    let cli = Cli::try_parse_from(["moxum", "init"]).unwrap();
     let Some(Commands::Init(args)) = cli.command else {
         panic!("expected init command");
     };
@@ -96,7 +93,7 @@ fn init_options_are_optional() {
 #[test]
 fn init_accepts_supported_platforms() {
     for platform in ["vanilla", "paper", "fabric"] {
-        let cli = Cli::try_parse_from(["minegr", "init", "--platform", platform]).unwrap();
+        let cli = Cli::try_parse_from(["moxum", "init", "--platform", platform]).unwrap();
         let Some(Commands::Init(args)) = cli.command else {
             panic!("expected init command");
         };
@@ -108,8 +105,8 @@ fn init_accepts_supported_platforms() {
 #[test]
 fn init_directory_can_appear_before_or_after_flags() {
     for arguments in [
-        ["minegr", "init", "./server", "--name", "Survival"],
-        ["minegr", "init", "--name", "Survival", "./server"],
+        ["moxum", "init", "./server", "--name", "Survival"],
+        ["moxum", "init", "--name", "Survival", "./server"],
     ] {
         let cli = Cli::try_parse_from(arguments).unwrap();
         let Some(Commands::Init(args)) = cli.command else {
@@ -128,8 +125,8 @@ fn config_flags_are_no_longer_accepted() {
     ] {
         for flag in ["--config", "-c"] {
             for arguments in [
-                ["minegr", flag, "minegr.toml", command],
-                ["minegr", command, flag, "minegr.toml"],
+                ["moxum", flag, "moxum.toml", command],
+                ["moxum", command, flag, "moxum.toml"],
             ] {
                 let error = Cli::try_parse_from(arguments)
                     .err()

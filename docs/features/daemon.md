@@ -6,7 +6,7 @@ created: 2026-08-24
 
 # Daemon
 
-`minegr start` re-executes the binary in a detached internal mode. One daemon owns one Java server and serves concurrent clients over its UUID's Unix socket. Java must not outlive it.
+`moxum start` re-executes the binary in a detached internal mode. One daemon owns one Java server and serves concurrent clients over its UUID's Unix socket. Java must not outlive it.
 
 ## Lifecycle
 
@@ -39,4 +39,3 @@ Shutdown allows 60 seconds for Java, then sends `SIGTERM` and, after 10 more sec
 - [Operation coordination](../architecture/operation-coordination.md)
 - [Logging](../architecture/logging.md)
 - [Sync vs async](../decisions/0002-sync-vs-async.md)
-

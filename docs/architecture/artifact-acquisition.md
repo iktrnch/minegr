@@ -6,7 +6,7 @@ created: 2026-09-07
 
 # Artifact acquisition
 
-Resolve exact server coordinates during `init`, pin them in `minegr.toml`, and recreate only that build. Upstream failure never selects a replacement build.
+Resolve exact server coordinates during `init`, pin them in `moxum.toml`, and recreate only that build. Upstream failure never selects a replacement build.
 
 ## Resolution
 
@@ -24,7 +24,7 @@ The Fabric version picker keeps only game versions marked `stable: true`, preser
 | Paper    | `https://fill.papermc.io/v3/projects/paper` and `/versions/{minecraft_version}/builds`; take the first build's `downloads["server:default"]` URL and SHA-256 checksum |
 | Fabric   | `https://meta.fabricmc.net/v2/versions/game`, `/loader/{minecraft_version}`, and `/installer`; select stable Loader and Installer versions                            |
 
-Paper requests include a descriptive User-Agent with the Minegr version and contact URL or email. Fabric downloads use `https://meta.fabricmc.net/v2/versions/loader/{minecraft_version}/{loader_version}/{installer_version}/server/jar`.
+Paper requests include a descriptive User-Agent with the Moxum version and contact URL or email. Fabric downloads use `https://meta.fabricmc.net/v2/versions/loader/{minecraft_version}/{loader_version}/{installer_version}/server/jar`.
 
 ## Installation
 
@@ -52,4 +52,3 @@ Failure preserves the configuration for retry and publishes no partial artifact.
 - [Filesystem layout](filesystem-layout.md)
 - [Validation](validation.md)
 - [Init command](../features/commands/init.md)
-

@@ -4,16 +4,16 @@ status: unimplemented
 created: 2026-08-27
 ---
 
-# Minegr command
+# Moxum command
 
-`minegr` selects an instance and dispatches a command. A global optional positional `[CONFIG_DIR]` defaults to the current directory and can appear before or after any command:
+`moxum` selects an instance and dispatches a command. A global optional positional `[CONFIG_DIR]` defaults to the current directory and can appear before or after any command:
 
 ```text
-minegr start ./servers/survival
-minegr logs ./servers/survival --follow
+moxum start ./servers/survival
+moxum logs ./servers/survival --follow
 ```
 
-Resolve relative directories from the working directory without searching parents. The canonical UTF-8 directory is the server root, and its configuration is always `minegr.toml`. `init` requires an existing directory and may create that file; other commands require the file.
+Resolve relative directories from the working directory without searching parents. The canonical UTF-8 directory is the server root, and its configuration is always `moxum.toml`. `init` requires an existing directory and may create that file; other commands require the file.
 
 ## Commands
 
@@ -49,4 +49,3 @@ Clap retains its standard parse-error behaviour. Configuration errors name the p
 - [Sync command](sync.md)
 - [Start command](start.md)
 - [Commands architecture](../../architecture/commands.md)
-

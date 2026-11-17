@@ -6,7 +6,7 @@ created: 2026-08-24
 
 # Stop command
 
-`minegr stop` gracefully stops Java and its daemon.
+`moxum stop` gracefully stops Java and its daemon.
 
 Print `Stopping server…`, submit the request, and wait for Java exit, output draining, and socket cleanup. Then print `Server stopped successfully.`
 
@@ -22,4 +22,3 @@ No daemon reports `Server is not running`. The handshake requires matching versi
 - [Console command](console.md)
 - [Start command](start.md)
 - [Operation coordination](../../architecture/operation-coordination.md)
-

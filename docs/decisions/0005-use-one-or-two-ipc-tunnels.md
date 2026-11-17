@@ -8,7 +8,7 @@ superseded_by: []
 
 # Use one or two IPC tunnels
 ## Context
-Minegr tunnels are bidirectional, but requests and streamed responses must be read and written concurrently without interleaving frames.
+Moxum tunnels are bidirectional, but requests and streamed responses must be read and written concurrently without interleaving frames.
 ## Options considered
 ### Split one stream
 Call `UnixStream::into_split()` and give the read and write halves separate owners.

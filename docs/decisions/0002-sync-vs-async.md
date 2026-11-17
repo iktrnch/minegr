@@ -8,7 +8,7 @@ superseded_by: []
 # 0002-sync-vs-async
 
 ## Context
-`minegr` [daemon](../features/daemon.md) requires communication with a client and keeps track of multiple tasks concurrently.
+`moxum` [daemon](../features/daemon.md) requires communication with a client and keeps track of multiple tasks concurrently.
 
 Most of such tasks are IO bound which may be designed as async event-driven or managed by using system threads. 
 ## Options considered

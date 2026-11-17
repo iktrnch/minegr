@@ -1,10 +1,10 @@
 # Domain Docs
 
-How engineering skills should consume Minegr's domain documentation.
+How engineering skills should consume Moxum's domain documentation.
 
 ## Source of truth
 
-This is a single-context repository. The `docs/` tree is the behavioural source of truth for planned and documented Minegr behaviour.
+This is a single-context repository. The `docs/` tree is the behavioural source of truth for planned and documented Moxum behaviour.
 
 Before exploring or changing a subsystem:
 

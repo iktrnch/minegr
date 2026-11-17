@@ -6,10 +6,10 @@ created: 2026-08-28
 
 # Configuration
 
-One versioned `minegr.toml` describes an instance's identity, pinned server software, Java launch settings, EULA acceptance, and Minecraft properties. Copying it recreates the configured initial state; worlds and other mutable data are transferred separately.
+One versioned `moxum.toml` describes an instance's identity, pinned server software, Java launch settings, EULA acceptance, and Minecraft properties. Copying it recreates the configured initial state; worlds and other mutable data are transferred separately.
 
 ```toml
-[minegr]
+[moxum]
 config_version = 1
 uuid = "018f0000-0000-7000-8000-000000000000"
 name = "survival"
@@ -33,9 +33,9 @@ white-list = true
 
 ## Schema
 
-- `[minegr]`: format version, UUID, and display name. Require `config_version = 1`.
+- `[moxum]`: format version, UUID, and display name. Require `config_version = 1`.
 - `[minecraft]`: Vanilla requires `version`; Paper adds `build`; Fabric adds `loader` and `installer`. Reject fields for another platform. Store an upstream checksum as `<algorithm>:<hex>` when available.
-- `[java]`: optional executable, JVM arguments, and server arguments. If omitted, discover compatible Java from `PATH`. Minegr supplies `-jar ./server.jar` and launches without a shell. It never installs Java.
+- `[java]`: optional executable, JVM arguments, and server arguments. If omitted, discover compatible Java from `PATH`. Moxum supplies `-jar ./server.jar` and launches without a shell. It never installs Java.
 - `[minecraft.properties]`: recognized properties are typed and validated; unknown properties may be strings, numbers, or booleans. Omitted recognized properties use Minecraft defaults when reconstructed.
 - Reject unknown keys outside the properties table. Values are literal; no environment expansion.
 
@@ -58,4 +58,3 @@ Write to an adjacent temporary file, flush, and rename atomically. Preserve unre
 - [Init command](../features/commands/init.md)
 - [Sync command](../features/commands/sync.md)
 - [Use one declarative instance file](../decisions/0006-use-one-declarative-instance-file.md)
-

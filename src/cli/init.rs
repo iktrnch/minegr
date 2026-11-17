@@ -1,4 +1,4 @@
-use crate::config::Minegr;
+use crate::config::Moxum;
 use crate::config::{Config, Java, Minecraft};
 use crate::platform::Platform;
 use crate::platform::properties::Properties;
@@ -27,7 +27,7 @@ pub struct InitArgs {
     pub accept_eula: Option<bool>,
 }
 
-/// Initializes the selected directory, writing minegr.toml and managed server files there.
+/// Initializes the selected directory, writing moxum.toml and managed server files there.
 pub fn execute(args: &InitArgs, config_dir: &Path) -> anyhow::Result<()> {
     // Check if directory is empty; if not, refuse to initialize
     let is_empty = std::fs::read_dir(config_dir)?.next().transpose()?.is_none();
@@ -75,7 +75,7 @@ pub fn execute(args: &InitArgs, config_dir: &Path) -> anyhow::Result<()> {
 
     // Create the config
     let config = Config {
-        minegr: Minegr::new(name),
+        moxum: Moxum::new(name),
         minecraft: Minecraft::new(platform, version, checksum, eula),
         properties: Properties::default(),
         java: Java::default(),

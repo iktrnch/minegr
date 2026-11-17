@@ -6,7 +6,7 @@ created: 2026-09-07
 
 # Logging
 
-Minecraft owns `logs/latest.log` and its rotations. The daemon tails that file through the `Logs` port; Minegr keeps neither a duplicate Minecraft log file nor an in-memory history buffer.
+Minecraft owns `logs/latest.log` and its rotations. The daemon tails that file through the `Logs` port; Moxum keeps neither a duplicate Minecraft log file nor an in-memory history buffer.
 
 ## History and following
 
@@ -18,7 +18,7 @@ Display clients strip terminal controls, mute timestamps, and color warnings yel
 
 ## Daemon diagnostics
 
-Write `tracing` diagnostics under `.minegr/logs/`, one owner-only file per daemon session, retaining the newest seven. Exclude Minecraft output, Console input contents, and secrets.
+Write `tracing` diagnostics under `.moxum/logs/`, one owner-only file per daemon session, retaining the newest seven. Exclude Minecraft output, Console input contents, and secrets.
 
 ## Related
 
@@ -26,4 +26,3 @@ Write `tracing` diagnostics under `.minegr/logs/`, one owner-only file per daemo
 - [Logs command](../features/commands/logs.md)
 - [Console command](../features/commands/console.md)
 - [Tail Minecraft latest.log](../decisions/0007-tail-minecraft-latest-log.md)
-

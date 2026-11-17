@@ -10,11 +10,11 @@ superseded_by: []
 
 ## Context
 
-Minegr must recreate a server's configured initial state without treating mutable Minecraft data as configuration. Existing commands need one authoritative definition for identity, core artifacts, Java launch options, EULA acceptance, and `server.properties`.
+Moxum must recreate a server's configured initial state without treating mutable Minecraft data as configuration. Existing commands need one authoritative definition for identity, core artifacts, Java launch options, EULA acceptance, and `server.properties`.
 
 ## Options considered
 
-### One declarative `minegr.toml`
+### One declarative `moxum.toml`
 
 Store portable intent in one versioned file and generate the managed runtime files from it.
 
@@ -44,7 +44,7 @@ Recreate an instance by copying all configuration-like files from the server roo
 
 ## Decision
 
-Use one versioned `minegr.toml` as the declarative instance definition. It includes Minegr identity, exact core coordinates, Java launch configuration, EULA acceptance, and Minecraft properties. It excludes mutable state.
+Use one versioned `moxum.toml` as the declarative instance definition. It includes Moxum identity, exact core coordinates, Java launch configuration, EULA acceptance, and Minecraft properties. It excludes mutable state.
 
 `init` materializes missing managed files. `sync` explicitly captures `server.properties` back into the TOML file while the server is stopped.
 
@@ -72,4 +72,3 @@ The model provides Docker-Compose-like recreation while retaining Minecraft's co
 - [Filesystem layout](../architecture/filesystem-layout.md)
 - [Init command](../features/commands/init.md)
 - [Sync command](../features/commands/sync.md)
-

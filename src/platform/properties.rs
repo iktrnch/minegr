@@ -133,7 +133,7 @@ pub enum TextFilteringVersion {
 /// Optional Java Edition `server.properties` settings.
 ///
 /// Missing fields become `None` and are omitted from serialized output.
-/// `Default` sets only the Minegr MOTD and zero spawn protection.
+/// `Default` sets only the Moxum MOTD and zero spawn protection.
 /// Strings preserve property values such as JSON text and comma-separated lists.
 /// Fixed choices use enums with canonical strings or numeric property values.
 /// Version-specific and legacy keys are included; the target server determines support.
@@ -410,7 +410,7 @@ pub struct Properties {
 }
 
 impl Default for Properties {
-    /// Sets the Minegr MOTD and zero spawn protection, leaving all other settings unspecified.
+    /// Sets the Moxum MOTD and zero spawn protection, leaving all other settings unspecified.
     fn default() -> Self {
         Self {
             accepts_transfers: None,
@@ -457,8 +457,7 @@ impl Default for Properties {
             max_tick_time: None,
             max_world_size: None,
             motd: Some(
-                "              \u{00a7}kg\u{00a7}7 Powered by \u{00a7}2minegr \u{00a7}kg"
-                    .to_owned(),
+                "              \u{00a7}kg\u{00a7}7 Powered by \u{00a7}2moxum \u{00a7}kg".to_owned(),
             ),
             network_compression_threshold: None,
             online_mode: None,
@@ -504,13 +503,13 @@ impl Default for Properties {
 }
 
 impl Properties {
-    /// Writes `server.properties` under `config_dir` with a warning that minegr manages it.
+    /// Writes `server.properties` under `config_dir` with a warning that moxum manages it.
     pub fn try_save(&self, config_dir: &Path) -> anyhow::Result<()> {
         let text = serde_java_properties::to_string(self)
             .context("Failed to serialize server.properties")?;
         let text = format!(
-            "# IMPORTANT: Managed by minegr; changes are overwritten on the next server start.\n\
-             # Use minegr or edit minegr.toml to change server properties.\n\
+            "# IMPORTANT: Managed by moxum; changes are overwritten on the next server start.\n\
+             # Use moxum or edit moxum.toml to change server properties.\n\
              {text}"
         );
         std::fs::write(config_dir.join("server.properties"), text)

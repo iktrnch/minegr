@@ -6,7 +6,7 @@ created: 2026-08-24
 
 # Console command
 
-`minegr console` opens a Ratatui console with unframed logs, a bordered single-line composer, and server name/state below it.
+`moxum console` opens a Ratatui console with unframed logs, a bordered single-line composer, and server name/state below it.
 
 Load up to 10,000 current log lines and begin at the newest. Follow [logging](../../architecture/logging.md) for formatting and restart handling. State colors are green for `running`, yellow for `starting`/`stopping`, and red for `failed`/`stopped`.
 
@@ -30,7 +30,7 @@ Load up to 10,000 current log lines and begin at the newest. Follow [logging](..
 - Keep clients attached across restart, with input queued until readiness.
 - On Java failure or final stop, preserve logs, show the state, disable input, and wait for restart where possible or `Ctrl+C`.
 
-No daemon reports `Server is not running, start it with minegr start`.
+No daemon reports `Server is not running, start it with moxum start`.
 
 Use one Tokio tunnel for `Logs`, `Status`, and `Console`, with the [IPC](../../architecture/ipc-protocol.md) input acknowledgement rules. Restore the terminal after normal exit or errors.
 
@@ -39,4 +39,3 @@ Use one Tokio tunnel for `Logs`, `Status`, and `Console`, with the [IPC](../../a
 - [Logs command](logs.md)
 - [IPC protocol](../../architecture/ipc-protocol.md)
 - [Logging](../../architecture/logging.md)
-

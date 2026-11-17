@@ -18,7 +18,7 @@ Shared validators return structured errors and warnings without side effects. Us
 
 Report independent findings in a stable order; skip checks whose prerequisites failed. Errors block execution. Warnings use stderr; a risky operation requires its specific confirmation or force option, not blanket `--yes` consent.
 
-Reject incompatible Java, unknown Minegr keys, checksum mismatches, foreign-owned or non-regular configuration, and differing managed files. Broader configuration permissions warn. Name conflicting files and tell users to remove them before retrying `init`; never infer new pins from an existing JAR.
+Reject incompatible Java, unknown Moxum keys, checksum mismatches, foreign-owned or non-regular configuration, and differing managed files. Broader configuration permissions warn. Name conflicting files and tell users to remove them before retrying `init`; never infer new pins from an existing JAR.
 
 An active world `session.lock` or occupied configured port may indicate an unmanaged server. Reject the conflicting operation, explain how to inspect it, and never signal that process. Unavailable host checks do not imply success.
 
@@ -31,5 +31,3 @@ An active world `session.lock` or occupied configured port may indicate an unman
 - [Artifact acquisition](artifact-acquisition.md)
 - [Init command](../features/commands/init.md)
 - [Start command](../features/commands/start.md)
-
-

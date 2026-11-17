@@ -6,10 +6,10 @@ created: 2026-08-24
 
 # Init command
 
-`minegr init [CONFIG_DIR]` creates an instance configuration or materializes missing managed files. The directory defaults to `.` and must already exist. Configuration is saved as `minegr.toml` inside that directory, alongside the managed server files.
+`moxum init [CONFIG_DIR]` creates an instance configuration or materializes missing managed files. The directory defaults to `.` and must already exist. Configuration is saved as `moxum.toml` inside that directory, alongside the managed server files.
 
 ```text
-minegr init ./server --name survival
+moxum init ./server --name survival
 ```
 
 ## Options
@@ -27,7 +27,7 @@ minegr init ./server --name survival
 
 Flags bypass their prompts; invalid values fail. Missing required answers need an interactive terminal or explicit flags.
 
-`--memory` is an init-only shortcut; edit `minegr.toml` for later Java changes.
+`--memory` is an init-only shortcut; edit `moxum.toml` for later Java changes.
 
 ## New configuration
 
@@ -35,7 +35,7 @@ Flags bypass their prompts; invalid values fail. Missing required answers need a
 2. Resolve and pin the exact server build using [artifact acquisition](../../architecture/artifact-acquisition.md); Paper resolution uses the first returned build.
 3. Obtain explicit EULA acceptance and default server arguments to `["nogui"]`.
 4. Validate, show a summary, and confirm unless `--yes` is set.
-5. Atomically write owner-only `minegr.toml` and materialize `server.jar`, `server.properties`, and `eula.txt`.
+5. Atomically write owner-only `moxum.toml` and materialize `server.jar`, `server.properties`, and `eula.txt`.
 
 Use Clap and Dialoguer to fill `InitConfig`; `create_config` derives, writes, and returns `Config`. Java must already be available and compatible.
 
@@ -53,7 +53,7 @@ On success:
 
 ```text
 Configuration: <path>
-Start it with: minegr start <directory>
+Start it with: moxum start <directory>
 ```
 
 ## Related
@@ -64,4 +64,3 @@ Start it with: minegr start <directory>
 - [Validation](../../architecture/validation.md)
 - [Sync command](sync.md)
 - [Start command](start.md)
-

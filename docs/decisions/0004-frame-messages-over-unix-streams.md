@@ -8,7 +8,7 @@ superseded_by: []
 
 # Frame messages over Unix streams
 ## Context
-Minegr sends multiple serialized `Message` values through long-lived Unix stream connections. A stream preserves byte order but not message boundaries, so the protocol must identify where each message ends.
+Moxum sends multiple serialized `Message` values through long-lived Unix stream connections. A stream preserves byte order but not message boundaries, so the protocol must identify where each message ends.
 
 The framing method must support request/response exchanges and unbounded log or console streams. Serialization format is a separate decision.
 ## Options considered

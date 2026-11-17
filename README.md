@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="./assets/minegr.svg" width="620" alt="minegr logo">
+  <img src="./assets/moxum.svg" width="620" alt="moxum logo">
 
   <p><strong>Run Minecraft servers from the terminal, not a browser panel.</strong></p>
 
@@ -15,9 +15,9 @@
 ## Overview
 
 > [!Warning]
-> `minegr` is in **very early development**. It is not currently ready for production use, and features, configuration formats, commands, and architecture may change significantly.
+> `moxum` is in **very early development**. It is not currently ready for production use, and features, configuration formats, commands, and architecture may change significantly.
 
-**minegr** *(pronounced “mine-ger”, IPA: `/ˈmaɪn.dʒər/`)* is a Minecraft server manager written in Rust and designed around a fast CLI and TUI.
+**moxum** is a Minecraft server manager written in Rust and designed around a fast CLI and TUI.
 
 The goal is to make creating and operating Minecraft servers on Linux simple without requiring a browser-based management panel.
 
@@ -39,7 +39,7 @@ The goal is to make creating and operating Minecraft servers on Linux simple wit
 
 ## Who is it for?
 
-`minegr` is primarily intended for people who run Minecraft servers on Linux and are comfortable working in a terminal, including:
+`moxum` is primarily intended for people who run Minecraft servers on Linux and are comfortable working in a terminal, including:
 
 * Self-hosters and homelab users
 * Minecraft server administrators

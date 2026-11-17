@@ -6,7 +6,7 @@ created: 2026-08-24
 
 # Status command
 
-`minegr status` prints one daemon snapshot and exits:
+`moxum status` prints one daemon snapshot and exits:
 
 ```text
 Status: running
@@ -22,5 +22,4 @@ Status is read-only, bypasses Console input, and exits `0` for every reported st
 
 ## Related
 - [Daemon](../daemon.md)
-- [Minegr command](minegr.md)
-
+- [Moxum command](moxum.md)

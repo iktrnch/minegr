@@ -6,7 +6,7 @@ created: 2026-09-07
 
 # Sync command
 
-`minegr sync` captures a stopped server's `server.properties` into `minegr.toml`.
+`moxum sync` captures a stopped server's `server.properties` into `moxum.toml`.
 
 1. Load and validate configuration; reject a running daemon or unmanaged server.
 2. Parse the complete properties file, rejecting missing, unreadable, duplicate, or malformed data.
@@ -26,5 +26,3 @@ Synchronization is one-way into TOML and requires no confirmation. It never appl
 - [Validation](../../architecture/validation.md)
 - [Init command](init.md)
 - [Addon configuration proposal](../../proposals/addon-configuration.md)
-
-
