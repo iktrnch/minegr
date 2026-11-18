@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="./assets/moxum.svg" width="620" alt="moxum logo">
+  <img src="./assets/moxum.svg" height="128" alt="moxum logo">
 
   <p><strong>Run Minecraft servers from the terminal, not a browser panel.</strong></p>
 
